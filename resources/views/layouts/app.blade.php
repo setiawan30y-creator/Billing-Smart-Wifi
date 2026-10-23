@@ -34,6 +34,7 @@
     ['Monitoring', 'app.monitoring.index', 'activity', 'monitoring.view'],
     ['Gangguan Massal', 'app.incidents.index', 'alert', 'incidents.manage'],
     ['Pengumuman', 'app.announcements.index', 'megaphone', 'announcements.send'],
+    ['Peta Topologi', 'app.topology.index', 'map', 'network.odp.view'],
     ['Titik ODP & Peta', 'app.odps.index', 'map', 'network.odp.view'],
     ['ODC', 'app.odcs.index', 'layers', 'network.odp.view'],
     ['Router & Perangkat', 'app.devices.index', 'router', 'monitoring.devices.view'],

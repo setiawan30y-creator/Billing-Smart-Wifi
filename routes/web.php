@@ -288,6 +288,8 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
     });
 
     // Topologi FTTH: ODC & titik ODP
+    Route::get('peta-topologi', [Isp\TopologyController::class, 'index'])->middleware('can:network.odp.view')->name('topology.index');
+    Route::get('peta-topologi/status', [Isp\TopologyController::class, 'status'])->middleware('can:network.odp.view')->name('topology.status');
     Route::get('odp', [Isp\OdpController::class, 'index'])->middleware('can:network.odp.view')->name('odps.index');
     Route::get('odc', [Isp\OdcController::class, 'index'])->middleware('can:network.odp.view')->name('odcs.index');
     Route::middleware('can:network.odp.manage')->group(function () {

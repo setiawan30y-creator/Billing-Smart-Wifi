@@ -95,6 +95,9 @@ class PppoeStatusService
             'isolated_online' => $isolatedOnline->count(),
             'offline_list' => $errors ? collect() : $offline->sortBy(fn ($r) => $r['service']->customer?->name)->values(),
             'isolated_list' => $isolatedOnline->values(),
+            // service_id => online|offline (offline hanya bila semua router terbaca)
+            'states' => $online->mapWithKeys(fn ($r) => [$r['service']->id => 'online'])
+                ->union($errors ? [] : $offline->mapWithKeys(fn ($r) => [$r['service']->id => 'offline']))->all(),
         ];
     }
 }
