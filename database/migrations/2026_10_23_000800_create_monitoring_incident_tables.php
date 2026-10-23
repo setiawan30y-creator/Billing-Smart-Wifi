@@ -14,6 +14,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Bersihkan sisa percobaan migrasi yang gagal di tengah jalan (DDL MySQL tidak transaksional).
+        Schema::disableForeignKeyConstraints();
+        $this->down();
+        Schema::enableForeignKeyConstraints();
+
         Schema::create('monitoring_targets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();

@@ -14,6 +14,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Bersihkan sisa tabel dari percobaan migrasi sebelumnya yang gagal di tengah jalan
+        // (DDL MySQL tidak transaksional). Migrasi ini belum tercatat, jadi tabelnya belum dipakai.
+        Schema::disableForeignKeyConstraints();
+        $this->down();
+        Schema::enableForeignKeyConstraints();
+
         // ---------- Inventaris ----------
         Schema::create('inventory_items', function (Blueprint $table) {
             $table->id();
@@ -49,7 +55,8 @@ return new class extends Migration
             $table->foreignId('inventory_location_id')->constrained()->cascadeOnDelete();
             $table->decimal('quantity', 12, 2)->default(0);
             $table->timestamps();
-            $table->unique(['inventory_item_id', 'inventory_location_id']);
+            // Nama eksplisit: nama otomatis 65 karakter melebihi batas MySQL (64).
+            $table->unique(['inventory_item_id', 'inventory_location_id'], 'inv_balances_item_location_unique');
         });
 
         Schema::create('inventory_serial_numbers', function (Blueprint $table) {

@@ -14,6 +14,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Bersihkan sisa percobaan migrasi yang gagal di tengah jalan (DDL MySQL tidak transaksional).
+        Schema::disableForeignKeyConstraints();
+        $this->down();
+        Schema::enableForeignKeyConstraints();
+
         // ---------- Komisi kolektor ----------
         Schema::create('collection_assignments', function (Blueprint $table) {
             $table->id();
@@ -187,7 +192,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('invoices', fn (Blueprint $t) => $t->dropColumn('adjusted_amount'));
+        if (Schema::hasColumn('invoices', 'adjusted_amount')) {
+            Schema::table('invoices', fn (Blueprint $t) => $t->dropColumn('adjusted_amount'));
+        }
         foreach (['backup_audit_logs', 'restore_jobs', 'backup_artifacts', 'backup_jobs', 'financial_adjustments', 'accounting_periods',
             'reconciliation_items', 'reconciliation_batches', 'commission_entries', 'commission_settlements', 'commission_rules', 'collection_assignments'] as $t) {
             Schema::dropIfExists($t);
