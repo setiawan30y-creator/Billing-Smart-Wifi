@@ -4,7 +4,7 @@ Platform multi-tenant untuk perusahaan ISP: manajemen ISP penyewa (Super Admin),
 pelanggan internet, invoice otomatis, pembayaran + verifikasi + reversal, notifikasi WhatsApp,
 webhook Payment Gateway, registry router/perangkat, audit log, dan PWA.
 
-> Dibangun dari nol sesuai *ALMARA Billing WiFi SaaS — Master Blueprint (23 Okt 2026)*.
+> Dibangun dari nol sesuai *ALMARA Billing WiFi SaaS — Master Blueprint (23 Okt 2026)* — salinan terbaru ada di [`docs/ALMARA_Billing_WiFi_SaaS_Master_Blueprint.md`](docs/ALMARA_Billing_WiFi_SaaS_Master_Blueprint.md).
 > Developer: **@2026-Alifiandra**
 
 ---
@@ -16,8 +16,11 @@ webhook Payment Gateway, registry router/perangkat, audit log, dan PWA.
 | §2–4 Fondasi: multi-tenant, RBAC, audit, Manajemen Supplier ISP, provisioning, domain | ✅ |
 | §5 Paket SaaS, kuota, overage, SaaS Billing & usage metering | ✅ |
 | §6 Billing pelanggan, invoice otomatis idempoten, pengingat H-7…H+7 | ✅ |
+| §6 Mode tagihan prabayar/pascabayar (seragam per ISP atau per pelanggan) | ✅ |
 | §7 WhatsApp & Payment Gateway (adapter generik, webhook HMAC idempoten) | ✅ adapter — sesuaikan dengan API gateway Anda |
 | §8 Monitoring read-only (TCP, ICMP, RouterOS API: CPU/RAM/uptime/trafik/PPPoE), alarm, status collector | ✅ |
+| §8.8–8.9 PPPoE MikroTik (secret & online, read-only) + status online/offline di dashboard | ✅ |
+| §8.10 Peta Topologi Router/OLT → ODC → ODP → pelanggan dengan jalur animasi | ✅ (uplink Router → OLT belum dimodelkan) |
 | §9 Gangguan massal (topologi), deteksi klaster tiket, pengumuman massal | ✅ |
 | §10 Portal pelanggan PWA, tiket bantuan, tema Light/Dark | ✅ (Custom Theme Studio belum) |
 | §11 Data pelanggan & instalasi, KTP depan saja, peta | ✅ |
