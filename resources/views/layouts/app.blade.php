@@ -111,9 +111,21 @@
   @endforeach
 </nav>
 
+@if (config('almara.pwa'))
 <script>
   if ('serviceWorker' in navigator) { window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); }); }
 </script>
+@else
+<script>
+  {{-- Mode development: PWA dimatikan & service worker ALMARA lama dilepas agar tidak bentrok dengan proyek lain di alamat yang sama. --}}
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { var s = r.active || r.waiting || r.installing; if (s && s.scriptURL === location.origin + '/sw.js') r.unregister(); });
+    });
+    if (window.caches) caches.keys().then(function (k) { k.filter(function (n) { return n.indexOf('almara-static-') === 0; }).forEach(function (n) { caches.delete(n); }); });
+  }
+</script>
+@endif
 @stack('scripts')
 </body>
 </html>

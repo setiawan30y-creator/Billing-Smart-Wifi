@@ -11,6 +11,9 @@ return [
     // Domain platform untuk subdomain tenant, mis. "almara-billing.id" → isp1.almara-billing.id
     'platform_domain' => env('ALMARA_PLATFORM_DOMAIN'),
 
+    // PWA/service worker. Default hanya aktif di production agar tidak bentrok antarproyek di localhost.
+    'pwa' => in_array(env('ALMARA_PWA'), [null, ''], true) ? env('APP_ENV') === 'production' : (bool) env('ALMARA_PWA'),
+
     'super_admin' => [
         'name' => env('SUPERADMIN_NAME', 'Super Admin'),
         'email' => env('SUPERADMIN_EMAIL', 'superadmin@example.com'),
