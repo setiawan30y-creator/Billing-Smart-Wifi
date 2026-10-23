@@ -169,6 +169,7 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
 
     // Perangkat jaringan (registry)
     Route::get('perangkat', [Isp\NetworkDeviceController::class, 'index'])->middleware('can:monitoring.devices.view')->name('devices.index');
+    Route::get('pppoe', [Isp\PppoeController::class, 'index'])->middleware('can:monitoring.devices.view')->name('pppoe.index');
     Route::middleware('can:monitoring.devices.manage')->group(function () {
         Route::get('perangkat/tambah', [Isp\NetworkDeviceController::class, 'create'])->name('devices.create');
         Route::post('perangkat', [Isp\NetworkDeviceController::class, 'store'])->name('devices.store');

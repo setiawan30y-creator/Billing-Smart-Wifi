@@ -16,7 +16,7 @@
       <td class="mono small">{{ $d->host }}{{ $d->api_port ? ':'.$d->api_port : '' }}@if ($d->username)<div class="faint">user: {{ $d->username }} · kredensial terenkripsi</div>@endif</td>
       <td class="small">{{ $d->location ?: '-' }}</td>
       <td>@if ($d->is_active)<x-badge status="active" label="Aktif"/>@else<x-badge status="void" label="Nonaktif"/>@endif</td>
-      <td class="right nowrap">@can('monitoring.settings.manage')<a class="btn btn-sm btn-ghost" href="{{ route('app.monitoring.create', ['device' => $d->id]) }}">Pantau</a>@endcan @can('monitoring.devices.manage')<a class="btn btn-sm" href="{{ route('app.devices.edit', $d) }}">Ubah</a>@endcan</td></tr>
+      <td class="right nowrap">@if ($d->type === 'mikrotik')<a class="btn btn-sm btn-ghost" href="{{ route('app.pppoe.index', ['device' => $d->id]) }}">PPPoE</a>@endif @can('monitoring.settings.manage')<a class="btn btn-sm btn-ghost" href="{{ route('app.monitoring.create', ['device' => $d->id]) }}">Pantau</a>@endcan @can('monitoring.devices.manage')<a class="btn btn-sm" href="{{ route('app.devices.edit', $d) }}">Ubah</a>@endcan</td></tr>
   @empty <tr><td colspan="6" class="empty">Belum ada perangkat.</td></tr> @endforelse
   </tbody></table></div></div>
 @endsection

@@ -37,6 +37,7 @@
     ['Titik ODP & Peta', 'app.odps.index', 'map', 'network.odp.view'],
     ['ODC', 'app.odcs.index', 'layers', 'network.odp.view'],
     ['Router & Perangkat', 'app.devices.index', 'router', 'monitoring.devices.view'],
+    ['PPPoE MikroTik', 'app.pppoe.index', 'users', 'monitoring.devices.view'],
     ['Pengaturan', null, null, null],
     ['WhatsApp', 'app.templates.index', 'message', 'notifications.manage'],
     ['Pengguna & Role', 'app.users.index', 'user', 'users.manage'],
