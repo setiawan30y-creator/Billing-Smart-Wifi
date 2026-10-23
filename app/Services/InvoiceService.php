@@ -39,7 +39,14 @@ class InvoiceService
                 ->whereHas('customer', fn ($q) => $q->where('status', 'active'))
                 ->chunkById(200, function ($services) use ($tenant, $period, $periodStart, $notify, &$created, &$skipped) {
                     foreach ($services as $service) {
-                        $invoice = $this->createRecurring($tenant, $service, $period, $periodStart);
+                        $billed = $service->billedPeriodFor($period);
+                        // Pascabayar: layanan yang baru mulai di bulan penagihan belum punya pemakaian untuk ditagih.
+                        if ($service->started_at->format('Y-m') > $billed) {
+                            $skipped++;
+
+                            continue;
+                        }
+                        $invoice = $this->createRecurring($tenant, $service, $billed, $periodStart, $period);
                         if ($invoice) {
                             $created++;
                             if ($notify) {
@@ -57,8 +64,14 @@ class InvoiceService
         });
     }
 
-    protected function createRecurring(Tenant $tenant, CustomerService $service, string $period, CarbonImmutable $periodStart): ?Invoice
+    /**
+     * @param  string  $period  periode pemakaian yang ditagih (unik per layanan)
+     * @param  CarbonImmutable  $periodStart  awal bulan penagihan (tanggal terbit invoice)
+     * @param  string|null  $runPeriod  bulan penagihan (untuk penomoran)
+     */
+    protected function createRecurring(Tenant $tenant, CustomerService $service, string $period, CarbonImmutable $periodStart, ?string $runPeriod = null): ?Invoice
     {
+        $runPeriod ??= $period;
         if (Invoice::where('customer_service_id', $service->id)->where('period', $period)->exists()) {
             return null;
         }
@@ -69,11 +82,11 @@ class InvoiceService
         $price = $service->monthlyPrice();
 
         try {
-            return DB::transaction(function () use ($tenant, $service, $period, $issue, $due, $price) {
+            return DB::transaction(function () use ($tenant, $service, $period, $issue, $due, $price, $runPeriod) {
                 $invoice = Invoice::create([
                     'customer_id' => $service->customer_id,
                     'customer_service_id' => $service->id,
-                    'number' => $this->nextNumber($tenant, $period),
+                    'number' => $this->nextNumber($tenant, $runPeriod),
                     'period' => $period,
                     'issue_date' => $issue,
                     'due_date' => $due,
@@ -85,7 +98,9 @@ class InvoiceService
                     'status' => 'unpaid',
                 ]);
                 $invoice->items()->create([
-                    'description' => 'Internet '.$service->package->name.' periode '.$period,
+                    'description' => $service->isPostpaid()
+                        ? 'Internet '.$service->package->name.' pemakaian periode '.$period.' (pascabayar)'
+                        : 'Internet '.$service->package->name.' periode '.$period.' (prabayar)',
                     'quantity' => 1,
                     'unit_price' => $price,
                     'amount' => $price,

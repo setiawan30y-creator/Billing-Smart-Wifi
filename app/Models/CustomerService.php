@@ -13,8 +13,11 @@ class CustomerService extends Model
 
     public const STATUSES = ['active' => 'Aktif', 'isolated' => 'Terisolir', 'terminated' => 'Berhenti'];
 
+    /** prepaid = tagih bulan berjalan (bayar di muka); postpaid = tagih pemakaian bulan sebelumnya. */
+    public const BILLING_MODES = ['prepaid' => 'Prabayar', 'postpaid' => 'Pascabayar'];
+
     protected $fillable = [
-        'customer_id', 'service_package_id', 'status', 'price_override', 'billing_day', 'due_days', 'pppoe_username', 'started_at', 'ended_at',
+        'customer_id', 'service_package_id', 'status', 'price_override', 'billing_day', 'due_days', 'billing_mode', 'pppoe_username', 'started_at', 'ended_at',
     ];
 
     protected function casts(): array
@@ -40,6 +43,24 @@ class CustomerService extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function isPostpaid(): bool
+    {
+        return $this->billing_mode === 'postpaid';
+    }
+
+    public function billingModeLabel(): string
+    {
+        return self::BILLING_MODES[$this->billing_mode ?? 'prepaid'] ?? 'Prabayar';
+    }
+
+    /** Periode pemakaian yang ditagih pada bulan penagihan $runPeriod (YYYY-MM). */
+    public function billedPeriodFor(string $runPeriod): string
+    {
+        return $this->isPostpaid()
+            ? \Carbon\CarbonImmutable::createFromFormat('!Y-m', $runPeriod)->subMonthNoOverflow()->format('Y-m')
+            : $runPeriod;
     }
 
     public function monthlyPrice(): string

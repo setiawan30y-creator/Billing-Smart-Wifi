@@ -20,6 +20,7 @@ class SettingsController extends Controller
             'brand_name' => ['nullable', 'string', 'max:120'],
             'theme' => ['required', 'in:default,light,dark'],
             'quota_policy' => ['required', 'in:warn,block_new'],
+            'default_billing_mode' => ['required', 'in:prepaid,postpaid'],
             'invoice_prefix' => ['required', 'alpha_dash', 'max:10'],
             'reminder_offsets' => ['nullable', 'array'],
             'reminder_offsets.*' => ['integer', 'in:-7,-3,-1,0,1,3,7'],
@@ -30,6 +31,7 @@ class SettingsController extends Controller
         $before = ['brand_name' => $tenant->brand_name, 'theme' => $tenant->theme, 'settings' => $tenant->settings];
         $settings = $tenant->settings ?? [];
         $settings['quota_policy'] = $data['quota_policy'];
+        $settings['default_billing_mode'] = $data['default_billing_mode'];
         $settings['invoice_prefix'] = strtoupper($data['invoice_prefix']);
         $settings['reminder_offsets'] = array_values(array_map('intval', $data['reminder_offsets'] ?? []));
         $settings['payment_instructions'] = $data['payment_instructions'] ?? null;

@@ -47,6 +47,7 @@ class CustomerImportService
         'tanggal_tagih' => ['Tanggal tagih (1-28)', false, '1'],
         'jatuh_tempo_hari' => ['Jatuh tempo (hari)', false, '10'],
         'harga_khusus' => ['Harga khusus (kosong = harga paket)', false, ''],
+        'mode_tagihan' => ['Mode tagihan (prabayar/pascabayar, kosong = default)', false, 'prabayar'],
         'pppoe_username' => ['PPPoE username', false, ''],
         'kode_odp' => ['Kode ODP', false, ''],
         'port_odp' => ['Port ODP', false, ''],
@@ -180,6 +181,7 @@ class CustomerImportService
             $svc = $c->services()->create([
                 'service_package_id' => $n['service_package_id'], 'status' => 'active',
                 'price_override' => $n['harga_khusus'], 'billing_day' => $n['tanggal_tagih'], 'due_days' => $n['jatuh_tempo_hari'],
+                'billing_mode' => $n['mode_tagihan'] ?? $tenant->setting('default_billing_mode', 'prepaid'),
                 'pppoe_username' => $n['pppoe_username'], 'started_at' => $n['tanggal_mulai'],
             ]);
             if ($n['odp_port_id']) {
@@ -284,7 +286,7 @@ class CustomerImportService
         // Layanan
         $n['service_package_id'] = null;
         $n['odp_port_id'] = null;
-        $n['tanggal_mulai'] = $n['harga_khusus'] = $n['pppoe_username'] = null;
+        $n['tanggal_mulai'] = $n['harga_khusus'] = $n['pppoe_username'] = $n['mode_tagihan'] = null;
         $n['tanggal_tagih'] = 1;
         $n['jatuh_tempo_hari'] = 10;
         $pkgCode = strtoupper($g('kode_paket'));
@@ -330,6 +332,11 @@ class CustomerImportService
                 $n['harga_khusus'] = Money::parse($g('harga_khusus'));
             }
             $n['pppoe_username'] = $g('pppoe_username') ?: null;
+            $mode = strtolower($g('mode_tagihan'));
+            if ($mode !== '') {
+                $map = ['prabayar' => 'prepaid', 'prepaid' => 'prepaid', 'pra' => 'prepaid', 'pascabayar' => 'postpaid', 'postpaid' => 'postpaid', 'pasca' => 'postpaid'];
+                isset($map[$mode]) ? $n['mode_tagihan'] = $map[$mode] : $e[] = 'Mode tagihan harus prabayar atau pascabayar.';
+            }
 
             $odpCode = strtoupper($g('kode_odp'));
             if ($odpCode !== '') {

@@ -6,10 +6,11 @@
 @can('invoices.create')
 <div class="card" style="margin-bottom:1rem"><form method="POST" action="{{ route('app.invoices.generate') }}" class="toolbar" style="border:0">@csrf
   <strong>Generate invoice bulanan</strong>
-  <input type="month" name="period" class="input" value="{{ $defaultPeriod }}" required>
+  <label class="small muted" for="gen-period">Bulan penagihan</label>
+  <input type="month" id="gen-period" name="period" class="input" value="{{ $defaultPeriod }}" required>
   <label class="check small"><input type="checkbox" name="notify" value="1" checked> Kirim notifikasi WhatsApp</label>
   <button class="btn btn-primary">Generate</button>
-  <span class="small muted">Aman diulang — layanan yang sudah punya invoice periode tsb. dilewati.</span>
+  <span class="small muted">Prabayar ditagih untuk bulan ini, pascabayar untuk pemakaian bulan sebelumnya. Aman diulang — invoice yang sudah ada dilewati.</span>
 </form></div>
 @endcan
 <div class="card">

@@ -43,6 +43,9 @@ class CustomerServiceController extends Controller
                 if ($data['status'] === 'terminated' && $service->status !== 'terminated') {
                     $data['ended_at'] = now($this->tenant()->timezone)->toDateString();
                 }
+                if (($original['billing_mode'] ?? 'prepaid') === 'postpaid' && ($data['billing_mode'] ?? 'postpaid') === 'prepaid') {
+                    session()->flash('warnings', ['Layanan beralih dari pascabayar ke prabayar: pemakaian bulan berjalan sebelum peralihan tidak tertagih otomatis. Buat invoice manual bila perlu.']);
+                }
                 $service->update($data);
                 AuditLogger::changes('service.updated', $service, $original, $request->input('reason'));
 
@@ -90,6 +93,7 @@ class CustomerServiceController extends Controller
             'price_override' => $data['price_override'] ?? null,
             'billing_day' => $data['billing_day'] ?? 1,
             'due_days' => $data['due_days'] ?? 10,
+            'billing_mode' => $data['billing_mode'] ?? $tenant->setting('default_billing_mode', 'prepaid'),
             'pppoe_username' => $data['pppoe_username'] ?? null,
             'started_at' => $data['started_at'],
         ]);
@@ -114,6 +118,7 @@ class CustomerServiceController extends Controller
             'price_override' => ['nullable', 'numeric', 'min:0'],
             'billing_day' => ['required', 'integer', 'between:1,28'],
             'due_days' => ['required', 'integer', 'between:0,60'],
+            'billing_mode' => [$update ? 'sometimes' : 'nullable', Rule::in(array_keys(CustomerService::BILLING_MODES))],
             'pppoe_username' => ['nullable', 'string', 'max:100'],
             'started_at' => [$update ? 'sometimes' : 'required', 'date'],
             'status' => [$update ? 'required' : 'nullable', Rule::in(array_keys(CustomerService::STATUSES))],

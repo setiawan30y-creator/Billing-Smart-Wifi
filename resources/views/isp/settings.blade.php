@@ -13,6 +13,9 @@
   </div></div>
   <div class="card-body form-section"><p class="section-title">Billing</p><div class="form-grid">
     <x-field name="invoice_prefix" label="Prefix nomor invoice" :value="$tenant->setting('invoice_prefix', 'INV')" required/>
+    <div class="field"><label class="req">Mode tagihan default layanan baru</label><select name="default_billing_mode" class="input">
+      @foreach (\App\Models\CustomerService::BILLING_MODES as $k => $l)<option value="{{ $k }}" @selected($tenant->setting('default_billing_mode', 'prepaid') === $k)>{{ $l }}</option>@endforeach
+    </select><div class="hint">Prabayar: invoice bulan berjalan (bayar di muka). Pascabayar: invoice pemakaian bulan sebelumnya. Bisa diubah per layanan pelanggan.</div></div>
     <div class="field"><label class="req">Kebijakan saat kuota paket penuh</label><select name="quota_policy" class="input">
       <option value="warn" @selected($tenant->setting('quota_policy') === 'warn')>Tetap izinkan + tampilkan peringatan (biaya tambahan berlaku)</option>
       <option value="block_new" @selected($tenant->setting('quota_policy') === 'block_new')>Tolak penambahan client/router baru</option>
