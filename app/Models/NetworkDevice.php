@@ -16,6 +16,11 @@ class NetworkDevice extends Model
 
     protected $hidden = ['password'];
 
+    public function monitoringTargets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(MonitoringTarget::class);
+    }
+
     protected function casts(): array
     {
         return ['password' => 'encrypted', 'is_active' => 'boolean', 'latitude' => 'decimal:7', 'longitude' => 'decimal:7'];

@@ -207,6 +207,40 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
     });
     Route::get('inventaris/{item}', [Isp\InventoryController::class, 'show'])->middleware('can:inventory.view')->name('inventory.show');
 
+    // Monitoring jaringan (read-only)
+    Route::middleware('can:monitoring.view')->group(function () {
+        Route::get('monitoring', [Isp\MonitoringController::class, 'index'])->name('monitoring.index');
+        Route::get('monitoring/alarm', [Isp\MonitoringController::class, 'alerts'])->name('monitoring.alerts');
+    });
+    Route::middleware('can:monitoring.settings.manage')->group(function () {
+        Route::get('monitoring/target/tambah', [Isp\MonitoringController::class, 'create'])->name('monitoring.create');
+        Route::post('monitoring/target', [Isp\MonitoringController::class, 'store'])->name('monitoring.store');
+        Route::get('monitoring/target/{target}/edit', [Isp\MonitoringController::class, 'edit'])->name('monitoring.edit');
+        Route::put('monitoring/target/{target}', [Isp\MonitoringController::class, 'update'])->name('monitoring.update');
+        Route::delete('monitoring/target/{target}', [Isp\MonitoringController::class, 'destroy'])->name('monitoring.destroy');
+        Route::post('monitoring/target/{target}/cek', [Isp\MonitoringController::class, 'checkNow'])->middleware('throttle:30,1')->name('monitoring.check');
+        Route::post('monitoring/pengaturan', [Isp\MonitoringController::class, 'settings'])->name('monitoring.settings');
+    });
+    Route::get('monitoring/target/{target}', [Isp\MonitoringController::class, 'show'])->middleware('can:monitoring.view')->name('monitoring.show');
+    Route::post('monitoring/alarm/{alert}/ack', [Isp\MonitoringController::class, 'acknowledge'])->middleware('can:monitoring.alerts.acknowledge')->name('monitoring.ack');
+
+    // Gangguan massal & pengumuman
+    Route::middleware('can:incidents.manage')->group(function () {
+        Route::get('gangguan', [Isp\IncidentController::class, 'index'])->name('incidents.index');
+        Route::get('gangguan/buat', [Isp\IncidentController::class, 'create'])->name('incidents.create');
+        Route::post('gangguan', [Isp\IncidentController::class, 'store'])->name('incidents.store');
+        Route::get('gangguan/{incident}', [Isp\IncidentController::class, 'show'])->name('incidents.show');
+        Route::post('gangguan/{incident}/update', [Isp\IncidentController::class, 'update'])->name('incidents.update');
+        Route::post('gangguan/{incident}/cakupan', [Isp\IncidentController::class, 'affected'])->name('incidents.affected');
+    });
+    Route::middleware('can:announcements.send')->group(function () {
+        Route::get('pengumuman', [Isp\AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('pengumuman/buat', [Isp\AnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('pengumuman', [Isp\AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('pengumuman/{announcement}', [Isp\AnnouncementController::class, 'show'])->name('announcements.show');
+        Route::post('pengumuman/{announcement}/kirim', [Isp\AnnouncementController::class, 'send'])->middleware('throttle:10,1')->name('announcements.send');
+    });
+
     // Topologi FTTH: ODC & titik ODP
     Route::get('odp', [Isp\OdpController::class, 'index'])->middleware('can:network.odp.view')->name('odps.index');
     Route::get('odc', [Isp\OdcController::class, 'index'])->middleware('can:network.odp.view')->name('odcs.index');

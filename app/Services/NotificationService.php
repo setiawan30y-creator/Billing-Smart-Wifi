@@ -42,6 +42,10 @@ class NotificationService
     {
         return app(TenantContext::class)->run($tenant, function () use ($tenant, $customer, $event, $data, $dedupeKey, $notifiable) {
             $template = NotificationTemplate::where('event', $event)->where('channel', 'whatsapp')->first();
+            if (! $template && isset(NotificationTemplate::DEFAULTS[$event])) {
+                // Template untuk event baru dibuat otomatis dari default (tenant lama).
+                $template = NotificationTemplate::create(['event' => $event, 'channel' => 'whatsapp', 'body' => NotificationTemplate::DEFAULTS[$event], 'is_enabled' => true]);
+            }
             if (! $template || ! $template->is_enabled || ! $customer->phone) {
                 return null;
             }
