@@ -15,7 +15,8 @@
       <div class="table-wrap"><table class="table"><thead><tr><th>Paket</th><th class="num">Harga</th><th>Tagih</th><th>Mulai</th><th>Status</th><th></th></tr></thead><tbody>
       @forelse ($customer->services as $s)
         <tr>
-          <td><strong>{{ $s->package->name }}</strong>@if ($s->pppoe_username)<div class="small mono faint">PPPoE: {{ $s->pppoe_username }}</div>@endif</td>
+          <td><strong>{{ $s->package->name }}</strong>@if ($s->pppoe_username)<div class="small mono faint">PPPoE: {{ $s->pppoe_username }}</div>@endif
+            <div class="small">@if ($s->odpPort)<a href="{{ route('app.odps.show', $s->odpPort->odp_id) }}"><x-icon name="pin" style="width:13px;height:13px;vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2"/> {{ $s->odpPort->odp->code }} · port {{ $s->odpPort->port_number }}</a>@elseif ($s->status !== 'terminated')<span class="faint">Belum terpasang ke ODP</span>@endif</div></td>
           <td class="num">{{ rupiah($s->monthlyPrice()) }}@if ($s->price_override !== null)<div class="small faint">harga khusus</div>@endif</td>
           <td class="small">tgl {{ $s->billing_day }} · tempo {{ $s->due_days }} hr</td>
           <td class="small">{{ tgl($s->started_at) }}@if ($s->ended_at)<br>s/d {{ tgl($s->ended_at) }}@endif</td>
@@ -32,6 +33,15 @@
             <div class="field"><label>PPPoE username</label><input name="pppoe_username" class="input" value="{{ $s->pppoe_username }}"></div>
             <div class="field"><label>Tanggal tagih</label><input type="number" name="billing_day" min="1" max="28" class="input" value="{{ $s->billing_day }}"></div>
             <div class="field"><label>Jatuh tempo (hari)</label><input type="number" name="due_days" min="0" max="60" class="input" value="{{ $s->due_days }}"></div>
+            @can('network.odp.manage')
+            <div class="field full"><label>Port ODP</label><select name="odp_port_id" class="input">
+              <option value="">— Tidak terpasang —</option>
+              @if ($s->odpPort)<option value="{{ $s->odpPort->id }}" selected>{{ $s->odpPort->odp->code }} · port {{ $s->odpPort->port_number }} (saat ini)</option>@endif
+              @foreach ($freePorts->groupBy(fn ($p) => $p->odp->code.' · '.$p->odp->name) as $grp => $ports)
+                <optgroup label="{{ $grp }}">@foreach ($ports as $fp)<option value="{{ $fp->id }}">{{ $fp->odp->code }} · port {{ $fp->port_number }}</option>@endforeach</optgroup>
+              @endforeach
+            </select><div class="hint">Hanya port kosong dari ODP aktif yang ditampilkan. Layanan berstatus "Berhenti" otomatis melepas port.</div></div>
+            @endcan
             <div class="field full"><label>Alasan perubahan</label><input name="reason" class="input" placeholder="Opsional, dicatat di audit"></div>
             <div class="full"><button class="btn btn-primary btn-sm">Simpan layanan</button> <span class="small muted">Status "Terisolir" hanya mencatat status di billing; tidak mengubah konfigurasi router.</span></div>
           </form></details></td></tr>
@@ -47,6 +57,11 @@
           <div class="field"><label class="req">Jatuh tempo (hari setelah terbit)</label><input type="number" name="due_days" class="input" value="10" min="0" max="60" required></div>
           <div class="field"><label>Harga khusus (Rp)</label><input name="price_override" class="input" placeholder="Kosong = harga paket"></div>
           <div class="field"><label>PPPoE username</label><input name="pppoe_username" class="input"></div>
+          @can('network.odp.manage')
+          <div class="field full"><label>Port ODP (opsional)</label><select name="odp_port_id" class="input"><option value="">— Pasang nanti —</option>
+            @foreach ($freePorts->groupBy(fn ($p) => $p->odp->code.' · '.$p->odp->name) as $grp => $ports)<optgroup label="{{ $grp }}">@foreach ($ports as $fp)<option value="{{ $fp->id }}">{{ $fp->odp->code }} · port {{ $fp->port_number }}</option>@endforeach</optgroup>@endforeach
+          </select></div>
+          @endcan
           <div class="full"><button class="btn btn-primary">Tambah layanan</button></div>
         </form></details>
       @endcan

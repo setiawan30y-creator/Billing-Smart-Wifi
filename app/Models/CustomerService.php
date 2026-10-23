@@ -32,6 +32,11 @@ class CustomerService extends Model
         return $this->belongsTo(ServicePackage::class, 'service_package_id');
     }
 
+    public function odpPort(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(OdpPort::class);
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);

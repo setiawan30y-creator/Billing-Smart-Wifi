@@ -16,7 +16,8 @@ webhook Payment Gateway, registry router/perangkat, audit log, dan PWA.
 | **Fase 1 — Fondasi**: multi-tenant, RBAC, audit, Manajemen Supplier ISP, provisioning, paket SaaS & langganan | ✅ |
 | **Fase 2 — Billing**: pelanggan, paket layanan, invoice, pembayaran, alokasi, reversal, SaaS Billing & usage metering | ✅ |
 | **Fase 3 — Gateway & notifikasi**: adapter WhatsApp, template pesan, webhook Payment Gateway (HMAC + idempoten), pengingat H-7…H+7 | ✅ (adapter generik — sesuaikan dengan API gateway Anda) |
-| Fase 4 — Monitoring jaringan (RouterOS API, SNMP, ICMP, alarm, GIS) | ⏳ Registry perangkat sudah ada; polling/metrik belum |
+| Topologi FTTH & GIS: ODC → titik ODP → port → pelanggan, peta Leaflet/OpenStreetMap, pemilih titik & lokasi GPS | ✅ |
+| Fase 4 — Monitoring jaringan (RouterOS API, SNMP, ICMP, alarm) | ⏳ Registry perangkat sudah ada; polling/metrik belum |
 | Fase 5–7 — Work order, kalender teknisi, inventaris, portal pelanggan, komisi kolektor, import Excel, backup/restore | ⏳ Belum |
 
 Monitoring **tidak** menampilkan angka apa pun yang belum benar-benar terukur.

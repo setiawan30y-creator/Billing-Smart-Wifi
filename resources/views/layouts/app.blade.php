@@ -19,6 +19,8 @@
     ['Pembayaran', 'app.payments.index', 'wallet', 'payments.view'],
     ['Jaringan', null, null, null],
     ['Paket Layanan', 'app.packages.index', 'package', 'packages.manage'],
+    ['Titik ODP & Peta', 'app.odps.index', 'map', 'network.odp.view'],
+    ['ODC', 'app.odcs.index', 'layers', 'network.odp.view'],
     ['Router & Perangkat', 'app.devices.index', 'router', 'monitoring.devices.view'],
     ['Pengaturan', null, null, null],
     ['WhatsApp', 'app.templates.index', 'message', 'notifications.manage'],

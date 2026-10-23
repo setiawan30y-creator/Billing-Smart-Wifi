@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Isp;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\CustomerService;
+use App\Models\OdpPort;
+use App\Services\OdpService;
+use Illuminate\Support\Facades\DB;
 use App\Services\AuditLogger;
 use App\Services\UsageMeter;
 use App\Support\Money;
@@ -18,7 +21,7 @@ class CustomerServiceController extends Controller
     {
         $data = $this->validated($request);
         try {
-            $this->createService($customer, $data);
+            DB::transaction(fn () => $this->createService($customer, $data));
         } catch (InvalidArgumentException $e) {
             return $this->fail($e);
         }
@@ -31,12 +34,35 @@ class CustomerServiceController extends Controller
     {
         $data = $this->validated($request, true);
         $original = $service->getOriginal();
+        $portId = $data['odp_port_id'] ?? null;
+        unset($data['odp_port_id']);
+        $odp = app(OdpService::class);
 
-        if ($data['status'] === 'terminated' && $service->status !== 'terminated') {
-            $data['ended_at'] = now($this->tenant()->timezone)->toDateString();
+        try {
+            DB::transaction(function () use ($service, $data, $original, $portId, $odp, $request) {
+                if ($data['status'] === 'terminated' && $service->status !== 'terminated') {
+                    $data['ended_at'] = now($this->tenant()->timezone)->toDateString();
+                }
+                $service->update($data);
+                AuditLogger::changes('service.updated', $service, $original, $request->input('reason'));
+
+                $current = $service->odpPort;
+                if ($service->status === 'terminated') {
+                    // Layanan berhenti → port ODP dikosongkan agar bisa dipakai pelanggan lain.
+                    if ($current) {
+                        $odp->release($current, 'Layanan berhenti');
+                    }
+                } elseif ($request->has('odp_port_id') && $request->user()->can('network.odp.manage')) {
+                    if ($portId && $portId != $current?->id) {
+                        $odp->assign(OdpPort::findOrFail($portId), $service);
+                    } elseif (! $portId && $current) {
+                        $odp->release($current, $request->input('reason'));
+                    }
+                }
+            });
+        } catch (InvalidArgumentException $e) {
+            return $this->fail($e);
         }
-        $service->update($data);
-        AuditLogger::changes('service.updated', $service, $original, $request->input('reason'));
 
         return back()->with('success', 'Layanan diperbarui.');
     }
@@ -69,6 +95,10 @@ class CustomerServiceController extends Controller
         ]);
         AuditLogger::log('service.created', $service, null, $service->only(['customer_id', 'service_package_id', 'started_at']));
 
+        if (! empty($data['odp_port_id']) && auth()->user()?->can('network.odp.manage')) {
+            app(OdpService::class)->assign(OdpPort::findOrFail($data['odp_port_id']), $service);
+        }
+
         return $service;
     }
 
@@ -87,6 +117,7 @@ class CustomerServiceController extends Controller
             'pppoe_username' => ['nullable', 'string', 'max:100'],
             'started_at' => [$update ? 'sometimes' : 'required', 'date'],
             'status' => [$update ? 'required' : 'nullable', Rule::in(array_keys(CustomerService::STATUSES))],
+            'odp_port_id' => ['nullable', Rule::exists('odp_ports', 'id')->where('tenant_id', $tenantId)],
         ]);
     }
 }

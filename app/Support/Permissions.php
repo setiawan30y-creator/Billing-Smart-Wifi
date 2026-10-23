@@ -38,6 +38,8 @@ class Permissions
         'reports.view' => ['reports', 'Lihat laporan', 'tenant'],
         'monitoring.devices.view' => ['monitoring', 'Lihat perangkat jaringan', 'tenant'],
         'monitoring.devices.manage' => ['monitoring', 'Kelola perangkat jaringan', 'tenant'],
+        'network.odp.view' => ['network', 'Lihat ODC/ODP & peta jaringan', 'tenant'],
+        'network.odp.manage' => ['network', 'Kelola ODC/ODP & port', 'tenant'],
         'notifications.manage' => ['notifications', 'Kelola template WhatsApp', 'tenant'],
         'notifications.test_send' => ['notifications', 'Kirim tes WhatsApp', 'tenant'],
         'users.manage' => ['users', 'Kelola pengguna tenant', 'tenant'],
@@ -51,14 +53,15 @@ class Permissions
         'isp_admin' => ['Admin ISP', 'tenant', ['*']],
         'noc' => ['NOC / Network Engineer', 'tenant', [
             'dashboard.view', 'customers.view', 'monitoring.devices.view', 'monitoring.devices.manage',
+            'network.odp.view', 'network.odp.manage',
         ]],
         'billing' => ['Staf Billing / Keuangan', 'tenant', [
             'dashboard.view', 'customers.view', 'customers.create', 'customers.update', 'services.manage',
             'invoices.view', 'invoices.create', 'invoices.void', 'payments.view', 'payments.create',
-            'payments.verify', 'payments.reverse', 'reports.view',
+            'payments.verify', 'payments.reverse', 'reports.view', 'network.odp.view',
         ]],
         'technician' => ['Teknisi', 'tenant', [
-            'dashboard.view', 'customers.view', 'monitoring.devices.view',
+            'dashboard.view', 'customers.view', 'monitoring.devices.view', 'network.odp.view', 'network.odp.manage',
         ]],
         'collector' => ['Petugas Kolektor / Agen', 'tenant', [
             'dashboard.view', 'customers.view', 'invoices.view', 'payments.view', 'payments.create',

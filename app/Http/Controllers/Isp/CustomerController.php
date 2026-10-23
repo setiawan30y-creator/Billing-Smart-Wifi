@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Isp;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Odp;
+use App\Models\OdpPort;
 use App\Models\ServicePackage;
 use App\Services\AuditLogger;
 use App\Services\SequenceService;
@@ -38,6 +40,7 @@ class CustomerController extends Controller
         return view('isp.customers.form', [
             'customer' => new Customer(['status' => 'active', 'ownership' => 'own']),
             'packages' => ServicePackage::where('is_active', true)->orderBy('price')->get(),
+            'odpPoints' => $this->odpPoints(),
         ]);
     }
 
@@ -74,7 +77,10 @@ class CustomerController extends Controller
     public function show(Customer $customer)
     {
         return view('isp.customers.show', [
-            'customer' => $customer->load(['services.package']),
+            'customer' => $customer->load(['services.package', 'services.odpPort.odp']),
+            'freePorts' => OdpPort::with('odp')->where('status', 'available')->whereNull('customer_service_id')
+                ->whereHas('odp', fn ($q) => $q->where('status', 'active'))->get()
+                ->sortBy(fn ($p) => [$p->odp->code, $p->port_number])->values(),
             'invoices' => $customer->invoices()->latest('issue_date')->limit(12)->get(),
             'payments' => $customer->payments()->latest()->limit(10)->get(),
             'packages' => ServicePackage::where('is_active', true)->orderBy('price')->get(),
@@ -84,7 +90,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
-        return view('isp.customers.form', ['customer' => $customer, 'packages' => collect()]);
+        return view('isp.customers.form', ['customer' => $customer, 'packages' => collect(), 'odpPoints' => $this->odpPoints()]);
     }
 
     public function update(Request $request, Customer $customer)
@@ -124,6 +130,13 @@ class CustomerController extends Controller
             'Cache-Control' => 'no-store, private',
             'Content-Disposition' => 'inline',
         ]);
+    }
+
+    /** Titik ODP untuk referensi di peta pemilih lokasi. */
+    protected function odpPoints(): array
+    {
+        return Odp::whereNotNull('latitude')->get(['code', 'name', 'latitude', 'longitude'])
+            ->map(fn ($o) => ['lat' => (float) $o->latitude, 'lng' => (float) $o->longitude, 'label' => 'ODP '.$o->code.' · '.$o->name])->all();
     }
 
     protected function validated(Request $request, ?Customer $customer = null): array

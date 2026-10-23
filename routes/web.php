@@ -145,6 +145,25 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
         Route::delete('perangkat/{device}', [Isp\NetworkDeviceController::class, 'destroy'])->name('devices.destroy');
     });
 
+    // Topologi FTTH: ODC & titik ODP
+    Route::get('odp', [Isp\OdpController::class, 'index'])->middleware('can:network.odp.view')->name('odps.index');
+    Route::get('odc', [Isp\OdcController::class, 'index'])->middleware('can:network.odp.view')->name('odcs.index');
+    Route::middleware('can:network.odp.manage')->group(function () {
+        Route::get('odp/tambah', [Isp\OdpController::class, 'create'])->name('odps.create');
+        Route::post('odp', [Isp\OdpController::class, 'store'])->name('odps.store');
+        Route::get('odp/{odp}/edit', [Isp\OdpController::class, 'edit'])->name('odps.edit');
+        Route::put('odp/{odp}', [Isp\OdpController::class, 'update'])->name('odps.update');
+        Route::delete('odp/{odp}', [Isp\OdpController::class, 'destroy'])->name('odps.destroy');
+        Route::post('odp-port/{port}/pasang', [Isp\OdpController::class, 'assign'])->name('odps.ports.assign');
+        Route::post('odp-port/{port}/lepas', [Isp\OdpController::class, 'release'])->name('odps.ports.release');
+        Route::post('odp-port/{port}/status', [Isp\OdpController::class, 'portStatus'])->name('odps.ports.status');
+        Route::get('odc/tambah', [Isp\OdcController::class, 'create'])->name('odcs.create');
+        Route::post('odc', [Isp\OdcController::class, 'store'])->name('odcs.store');
+        Route::get('odc/{odc}/edit', [Isp\OdcController::class, 'edit'])->name('odcs.edit');
+        Route::put('odc/{odc}', [Isp\OdcController::class, 'update'])->name('odcs.update');
+    });
+    Route::get('odp/{odp}', [Isp\OdpController::class, 'show'])->middleware('can:network.odp.view')->name('odps.show');
+
     // Pengaturan → WhatsApp → Template Pesan
     Route::middleware('can:notifications.manage')->group(function () {
         Route::get('pengaturan/whatsapp', [Isp\NotificationTemplateController::class, 'index'])->name('templates.index');

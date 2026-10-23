@@ -16,8 +16,7 @@
     <x-field name="address" label="Alamat pemasangan" type="textarea" :value="$customer->address" required full rows="2" placeholder="Alamat lengkap"/>
     <x-field name="landmark" label="Patokan rumah" :value="$customer->landmark" placeholder="mis. dekat masjid / warna pagar"/>
     <x-field name="maps_url" label="Link Google Maps" type="url" :value="$customer->maps_url" placeholder="https://maps.app.goo.gl/..."/>
-    <x-field name="latitude" label="Latitude" :value="$customer->latitude" placeholder="-6.2"/>
-    <x-field name="longitude" label="Longitude" :value="$customer->longitude" placeholder="106.8"/>
+    @include('partials.map-picker', ['lat' => $customer->latitude, 'lng' => $customer->longitude, 'others' => $odpPoints])
     <div class="field"><label class="req">Status rumah</label><select name="ownership" class="input" x-model="own"><option value="own">Milik pribadi</option><option value="rent">Kontrak / sewa</option></select></div>
     <div x-show="own === 'rent'" x-cloak><x-field name="owner_name" label="Nama pemilik rumah" :value="$customer->owner_name" placeholder="Nama pemilik"/></div>
     <x-field name="house_photo" label="Foto rumah / titik instalasi" type="file" accept="image/*" hint="Disimpan privat (bukan URL publik). Maks 4 MB."/>
