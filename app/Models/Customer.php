@@ -58,8 +58,8 @@ class Customer extends Model
 
     public function outstanding(): string
     {
-        $rows = $this->invoices()->whereIn('status', ['unpaid', 'partial'])->get(['total', 'amount_paid']);
+        $rows = $this->invoices()->whereIn('status', ['unpaid', 'partial'])->get(['id', 'total', 'amount_paid', 'adjusted_amount']);
 
-        return \App\Support\Money::add(...$rows->map(fn ($i) => \App\Support\Money::sub($i->total, $i->amount_paid))->all());
+        return \App\Support\Money::add(...$rows->map(fn ($i) => $i->balance())->all());
     }
 }

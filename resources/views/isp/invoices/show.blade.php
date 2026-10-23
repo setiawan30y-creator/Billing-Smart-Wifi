@@ -27,6 +27,7 @@
       @if ((float) $invoice->discount > 0)<tr><td colspan="3" class="num">Diskon</td><td class="num">−{{ rupiah($invoice->discount) }}</td></tr>@endif
       <tr><td colspan="3" class="num"><strong>Total</strong></td><td class="num"><strong>{{ rupiah($invoice->total) }}</strong></td></tr>
       <tr><td colspan="3" class="num">Dibayar (terverifikasi)</td><td class="num">{{ rupiah($invoice->amount_paid) }}</td></tr>
+      @if ((float) $invoice->adjusted_amount > 0)<tr><td colspan="3" class="num">Penyesuaian disetujui</td><td class="num">−{{ rupiah($invoice->adjusted_amount) }}</td></tr>@endif
       <tr><td colspan="3" class="num"><strong>Sisa</strong></td><td class="num"><strong>{{ rupiah($invoice->balance()) }}</strong></td></tr>
     </tfoot></table></div></div>
   <div class="stack">
@@ -35,6 +36,19 @@
       @if ($invoice->service)<dt>Layanan</dt><dd>{{ $invoice->service->package?->name }}</dd>@endif
       @if ($invoice->notes)<dt>Catatan</dt><dd>{{ $invoice->notes }}</dd>@endif
     </dl></div></div>
+    @if (in_array($invoice->status, ['unpaid', 'partial']))
+    @can('finance.adjustments.create')
+    <details class="card"><summary class="card-body" style="cursor:pointer;font-weight:600">Ajukan penyesuaian (credit note / write-off)</summary>
+      <form method="POST" action="{{ route('app.finance.adjustments.store') }}" class="card-body stack" style="border-top:1px solid var(--border)">@csrf
+        <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+        <div class="field"><label>Jenis</label><select name="type" class="input">@foreach (\App\Models\FinancialAdjustment::TYPES as $k => $l)<option value="{{ $k }}">{{ $l }}</option>@endforeach</select></div>
+        <x-field name="amount" label="Nominal (maks sisa tagihan)" :value="(int) $invoice->balance()" required/>
+        <x-field name="reason" label="Alasan" required placeholder="mis. kompensasi gangguan 3 hari"/>
+        <button class="btn">Ajukan</button>
+        <p class="small muted" style="margin:0">Invoice tidak diubah; penyesuaian berlaku setelah disetujui pengguna lain.</p>
+      </form></details>
+    @endcan
+    @endif
     <div class="card"><div class="card-head"><h3>Alokasi pembayaran</h3></div><div class="card-body">
       @forelse ($invoice->allocations as $a)
         <div style="display:flex;justify-content:space-between;margin-bottom:.4rem"><a class="mono small" href="{{ route('app.payments.show', $a->payment) }}">{{ $a->payment->number }}</a><span>{{ rupiah($a->amount) }} <x-badge :status="$a->payment->status" :label="\App\Models\Payment::STATUSES[$a->payment->status]"/></span></div>

@@ -11,14 +11,24 @@ webhook Payment Gateway, registry router/perangkat, audit log, dan PWA.
 
 ## Status implementasi (v1.0.0)
 
-| Fase blueprint | Status |
+| Bagian blueprint | Status |
 |---|---|
-| **Fase 1 — Fondasi**: multi-tenant, RBAC, audit, Manajemen Supplier ISP, provisioning, paket SaaS & langganan | ✅ |
-| **Fase 2 — Billing**: pelanggan, paket layanan, invoice, pembayaran, alokasi, reversal, SaaS Billing & usage metering | ✅ |
-| **Fase 3 — Gateway & notifikasi**: adapter WhatsApp, template pesan, webhook Payment Gateway (HMAC + idempoten), pengingat H-7…H+7 | ✅ (adapter generik — sesuaikan dengan API gateway Anda) |
-| Topologi FTTH & GIS: ODC → titik ODP → port → pelanggan, peta Leaflet/OpenStreetMap, pemilih titik & lokasi GPS | ✅ |
-| Fase 4 — Monitoring jaringan (RouterOS API, SNMP, ICMP, alarm) | ⏳ Registry perangkat sudah ada; polling/metrik belum |
-| Fase 5–7 — Work order, kalender teknisi, inventaris, portal pelanggan, komisi kolektor, import Excel, backup/restore | ⏳ Belum |
+| §2–4 Fondasi: multi-tenant, RBAC, audit, Manajemen Supplier ISP, provisioning, domain | ✅ |
+| §5 Paket SaaS, kuota, overage, SaaS Billing & usage metering | ✅ |
+| §6 Billing pelanggan, invoice otomatis idempoten, pengingat H-7…H+7 | ✅ |
+| §7 WhatsApp & Payment Gateway (adapter generik, webhook HMAC idempoten) | ✅ adapter — sesuaikan dengan API gateway Anda |
+| §8 Monitoring read-only (TCP, ICMP, RouterOS API: CPU/RAM/uptime/trafik/PPPoE), alarm, status collector | ✅ |
+| §9 Gangguan massal (topologi), deteksi klaster tiket, pengumuman massal | ✅ |
+| §10 Portal pelanggan PWA, tiket bantuan, tema Light/Dark | ✅ (Custom Theme Studio belum) |
+| §11 Data pelanggan & instalasi, KTP depan saja, peta | ✅ |
+| §12 Work order, checklist, foto, material, kalender teknisi | ✅ |
+| §13 Inventaris: lokasi, saldo, serial, mutasi permanen, opname | ✅ |
+| §14 Import Excel/CSV dengan preview & laporan error | ✅ |
+| §15 Rekonsiliasi mutasi bank, penyesuaian maker-checker, tutup periode | ✅ (jurnal akuntansi opsional belum) |
+| §16 Backup terenkripsi, uji restore di DB terpisah, restore dengan approval | ✅ (berkas unggahan dibackup terpisah) |
+| §17 Komisi kolektor dari pembayaran terverifikasi, reversal, pembayaran komisi | ✅ |
+| §18 Kesehatan platform (scheduler, antrean, collector, integrasi, kapasitas) | ✅ |
+| §22 Uji beban & uji keamanan produksi | ⏳ perlu dilakukan di server produksi |
 
 Monitoring **tidak** menampilkan angka apa pun yang belum benar-benar terukur.
 
@@ -83,6 +93,8 @@ Buka `http://127.0.0.1:8000` (atau `http://billing-smart-wifi.test` via Laragon 
 php artisan billing:generate-invoices            # invoice bulanan (idempoten)
 php artisan billing:send-reminders               # pengingat WhatsApp H-7…H+7
 php artisan saas:snapshot-usage                  # snapshot kuota client/router
+php artisan monitoring:collect --force           # ambil sampel monitoring sekarang
+php artisan backups:run --prune                  # backup semua tenant + hapus yang kedaluwarsa
 php artisan schedule:work                        # jalankan scheduler saat development
 ```
 
@@ -104,7 +116,7 @@ dan Supervisor untuk `php artisan queue:work`.
 php artisan test
 ```
 
-Mencakup isolasi tenant, onboarding ISP & provisioning, aktivasi sekali pakai, transisi status, idempotensi invoice/pembayaran/webhook,
+Mencakup isolasi tenant, portal pelanggan, import, work order & inventaris, monitoring, gangguan massal, komisi, rekonsiliasi, backup/restore, onboarding ISP & provisioning, aktivasi sekali pakai, transisi status, idempotensi invoice/pembayaran/webhook,
 alur partial → lunas → reversal, pembatasan permission, perhitungan overage SaaS, dan render seluruh halaman.
 
 ---

@@ -23,6 +23,7 @@ class PaymentService
         if (! Money::isPositive($data['amount'])) {
             throw new InvalidArgumentException('Nominal pembayaran harus lebih dari 0.');
         }
+        FinanceService::assertOpen($data['paid_at'] ?? now(), 'mencatat pembayaran bertanggal di periode tersebut');
 
         return DB::transaction(function () use ($tenant, $data, $proofPath) {
             if (! empty($data['idempotency_key'])) {
@@ -108,6 +109,8 @@ class PaymentService
             return $payment;
         });
 
+        app(CommissionService::class)->onPaymentVerified($payment);
+
         if ($notify) {
             $this->notifications->paymentReceived($tenant, $payment);
         }
@@ -135,6 +138,7 @@ class PaymentService
             if ($payment->status !== 'verified') {
                 throw new InvalidArgumentException('Hanya pembayaran terverifikasi yang dapat di-reversal.');
             }
+            FinanceService::assertOpen($payment->paid_at, 'reversal pembayaran');
             $payment->forceFill([
                 'status' => 'reversed', 'reversed_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(), 'reversed_at' => now(), 'reversal_reason' => $reason,
             ])->save();
@@ -144,6 +148,7 @@ class PaymentService
                 $invoice->recalculate();
             }
 
+            app(CommissionService::class)->onPaymentReversed($payment);
             AuditLogger::log('payment.reversed', $payment, ['status' => 'verified'], ['status' => 'reversed'], $reason);
         });
     }

@@ -11,3 +11,5 @@ Schedule::command('billing:send-reminders')->dailyAt('09:00')->withoutOverlappin
 Schedule::command('saas:snapshot-usage')->dailyAt('23:50')->withoutOverlapping()->onOneServer();
 Schedule::command('monitoring:collect')->everyMinute()->withoutOverlapping(10)->onOneServer();
 Schedule::command('monitoring:prune')->dailyAt('03:10')->onOneServer();
+Schedule::command('almara:heartbeat')->everyMinute();
+Schedule::command('backups:run --prune')->weeklyOn(0, '02:00')->withoutOverlapping()->onOneServer();

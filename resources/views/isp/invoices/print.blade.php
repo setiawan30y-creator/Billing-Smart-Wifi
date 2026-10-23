@@ -23,6 +23,7 @@
       @if ((float) $invoice->discount > 0)<tr><td colspan="3" class="num">Diskon</td><td class="num">−{{ rupiah($invoice->discount) }}</td></tr>@endif
       <tr><td colspan="3" class="num"><strong>Total</strong></td><td class="num"><strong>{{ rupiah($invoice->total) }}</strong></td></tr>
       <tr><td colspan="3" class="num">Dibayar</td><td class="num">{{ rupiah($invoice->amount_paid) }}</td></tr>
+      @if ((float) $invoice->adjusted_amount > 0)<tr><td colspan="3" class="num">Penyesuaian</td><td class="num">−{{ rupiah($invoice->adjusted_amount) }}</td></tr>@endif
       <tr><td colspan="3" class="num"><strong>Sisa tagihan</strong></td><td class="num"><strong>{{ rupiah($invoice->balance()) }}</strong></td></tr>
     </tfoot></table>
   @if ($invoice->notes)<p class="small" style="margin-top:1rem">Catatan: {{ $invoice->notes }}</p>@endif

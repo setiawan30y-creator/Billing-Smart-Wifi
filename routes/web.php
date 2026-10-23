@@ -86,6 +86,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'superadmin'])->grou
     });
 
     Route::get('audit', [Admin\AuditLogController::class, 'index'])->middleware('can:platform.audit_logs.view')->name('audit.index');
+    Route::get('kesehatan', Admin\HealthController::class)->middleware('can:platform.health.view')->name('health');
+
+    Route::middleware('can:platform.backups.restore')->group(function () {
+        Route::get('backup', [Admin\BackupController::class, 'index'])->name('backups.index');
+        Route::post('backup', [Admin\BackupController::class, 'run'])->name('backups.run');
+        Route::post('backup/{artifact}/uji', [Admin\BackupController::class, 'test'])->name('backups.test');
+        Route::post('backup/{artifact}/restore', [Admin\BackupController::class, 'restore'])->middleware('throttle:5,1')->name('backups.restore');
+    });
 });
 
 /*
@@ -239,6 +247,42 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
         Route::post('pengumuman', [Isp\AnnouncementController::class, 'store'])->name('announcements.store');
         Route::get('pengumuman/{announcement}', [Isp\AnnouncementController::class, 'show'])->name('announcements.show');
         Route::post('pengumuman/{announcement}/kirim', [Isp\AnnouncementController::class, 'send'])->middleware('throttle:10,1')->name('announcements.send');
+    });
+
+    // Komisi kolektor
+    Route::get('komisi', [Isp\CommissionController::class, 'index'])->middleware('can:commissions.view')->name('commissions.index');
+    Route::middleware('can:commissions.manage')->group(function () {
+        Route::post('komisi/aturan', [Isp\CommissionController::class, 'storeRule'])->name('commissions.rules.store');
+        Route::post('komisi/aturan/{rule}/toggle', [Isp\CommissionController::class, 'toggleRule'])->name('commissions.rules.toggle');
+        Route::get('komisi/penugasan', [Isp\CommissionController::class, 'assignments'])->name('commissions.assignments');
+        Route::post('komisi/penugasan', [Isp\CommissionController::class, 'saveAssignments'])->name('commissions.assignments.save');
+        Route::post('komisi/bayar', [Isp\CommissionController::class, 'settle'])->name('commissions.settle');
+    });
+
+    // Rekonsiliasi pembayaran
+    Route::middleware('can:reconciliation.manage')->group(function () {
+        Route::get('rekonsiliasi', [Isp\ReconciliationController::class, 'index'])->name('reconciliation.index');
+        Route::get('rekonsiliasi/template', [Isp\ReconciliationController::class, 'template'])->name('reconciliation.template');
+        Route::post('rekonsiliasi', [Isp\ReconciliationController::class, 'store'])->name('reconciliation.store');
+        Route::get('rekonsiliasi/{batch}', [Isp\ReconciliationController::class, 'show'])->name('reconciliation.show');
+        Route::post('rekonsiliasi/{batch}/item/{item}', [Isp\ReconciliationController::class, 'resolve'])->name('reconciliation.resolve');
+        Route::post('rekonsiliasi/{batch}/verifikasi', [Isp\ReconciliationController::class, 'verify'])->name('reconciliation.verify');
+        Route::post('rekonsiliasi/{batch}/selesai', [Isp\ReconciliationController::class, 'complete'])->name('reconciliation.complete');
+    });
+
+    // Audit keuangan
+    Route::get('keuangan', [Isp\FinanceController::class, 'index'])->middleware('can:reports.view')->name('finance.index');
+    Route::post('keuangan/penyesuaian', [Isp\FinanceController::class, 'storeAdjustment'])->middleware('can:finance.adjustments.create')->name('finance.adjustments.store');
+    Route::post('keuangan/penyesuaian/{adjustment}', [Isp\FinanceController::class, 'review'])->middleware('can:finance.adjustments.approve')->name('finance.adjustments.review');
+    Route::post('keuangan/periode', [Isp\FinanceController::class, 'closePeriod'])->middleware('can:finance.periods.close')->name('finance.periods.close');
+    Route::post('keuangan/periode/{period}/buka', [Isp\FinanceController::class, 'reopenPeriod'])->middleware('can:finance.periods.close')->name('finance.periods.reopen');
+
+    // Backup tenant
+    Route::middleware('can:backups.manage')->group(function () {
+        Route::get('backup', [Isp\BackupController::class, 'index'])->name('backups.index');
+        Route::post('backup', [Isp\BackupController::class, 'store'])->middleware('throttle:5,1')->name('backups.store');
+        Route::get('backup/{artifact}/unduh', [Isp\BackupController::class, 'download'])->name('backups.download');
+        Route::post('backup/{artifact}/uji', [Isp\BackupController::class, 'test'])->middleware('throttle:5,1')->name('backups.test');
     });
 
     // Topologi FTTH: ODC & titik ODP

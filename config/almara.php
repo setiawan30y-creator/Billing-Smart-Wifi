@@ -20,6 +20,8 @@ return [
         'password' => env('SUPERADMIN_PASSWORD'),
     ],
 
+    'backup_retention_days' => (int) env('ALMARA_BACKUP_RETENTION_DAYS', 30),
+
     // Disk privat untuk KTP, foto rumah, bukti bayar (tidak boleh URL publik).
     'private_disk' => env('ALMARA_PRIVATE_DISK', 'local'),
 

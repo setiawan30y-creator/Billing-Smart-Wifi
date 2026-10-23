@@ -45,6 +45,9 @@ class Permissions
         'commissions.view' => ['commissions', 'Lihat komisi kolektor', 'tenant'],
         'commissions.manage' => ['commissions', 'Atur & selesaikan komisi', 'tenant'],
         'reconciliation.manage' => ['payments', 'Rekonsiliasi pembayaran', 'tenant'],
+        'finance.adjustments.create' => ['finance', 'Ajukan penyesuaian keuangan (credit note)', 'tenant'],
+        'finance.adjustments.approve' => ['finance', 'Setujui penyesuaian keuangan', 'tenant'],
+        'finance.periods.close' => ['finance', 'Tutup / buka periode akuntansi', 'tenant'],
         'backups.manage' => ['backups', 'Buat & unduh backup tenant', 'tenant'],
         'packages.manage' => ['packages', 'Kelola paket layanan', 'tenant'],
         'services.manage' => ['services', 'Kelola layanan pelanggan', 'tenant'],
@@ -82,6 +85,7 @@ class Permissions
             'invoices.view', 'invoices.create', 'invoices.void', 'payments.view', 'payments.create',
             'payments.verify', 'payments.reverse', 'reports.view', 'network.odp.view', 'customers.import',
             'customers.portal.manage', 'tickets.view', 'tickets.manage', 'commissions.view', 'commissions.manage', 'reconciliation.manage',
+            'finance.adjustments.create',
         ]],
         'technician' => ['Teknisi', 'tenant', [
             'dashboard.view', 'customers.view', 'monitoring.devices.view', 'network.odp.view', 'network.odp.manage',

@@ -101,6 +101,8 @@ class InvoiceService
     /** Invoice manual (biaya pasang, perangkat, dll). $items = [[description, quantity, unit_price], ...] */
     public function createManual(Tenant $tenant, int $customerId, array $items, string $issueDate, string $dueDate, ?string $discount = null, ?string $notes = null): Invoice
     {
+        FinanceService::assertOpen($issueDate, 'membuat invoice bertanggal di periode tersebut');
+
         return DB::transaction(function () use ($tenant, $customerId, $items, $issueDate, $dueDate, $discount, $notes) {
             $subtotal = '0';
             $rows = [];
@@ -144,6 +146,7 @@ class InvoiceService
             if ($invoice->status === 'void') {
                 return;
             }
+            FinanceService::assertOpen($invoice->issue_date, 'membatalkan invoice');
             if (Money::isPositive($invoice->amount_paid)) {
                 throw new InvalidArgumentException('Invoice sudah memiliki pembayaran terverifikasi. Lakukan reversal pembayaran terlebih dahulu.');
             }

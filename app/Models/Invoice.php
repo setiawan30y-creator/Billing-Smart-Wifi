@@ -17,14 +17,14 @@ class Invoice extends Model
 
     protected $fillable = [
         'customer_id', 'customer_service_id', 'number', 'period', 'issue_date', 'due_date', 'subtotal', 'discount', 'tax',
-        'total', 'amount_paid', 'status', 'notes', 'created_by',
+        'total', 'amount_paid', 'adjusted_amount', 'status', 'notes', 'created_by',
     ];
 
     protected function casts(): array
     {
         return [
             'issue_date' => 'date', 'due_date' => 'date',
-            'subtotal' => 'decimal:2', 'discount' => 'decimal:2', 'tax' => 'decimal:2', 'total' => 'decimal:2', 'amount_paid' => 'decimal:2',
+            'subtotal' => 'decimal:2', 'discount' => 'decimal:2', 'tax' => 'decimal:2', 'total' => 'decimal:2', 'amount_paid' => 'decimal:2', 'adjusted_amount' => 'decimal:2',
         ];
     }
 
@@ -55,7 +55,7 @@ class Invoice extends Model
 
     public function balance(): string
     {
-        return Money::sub($this->total, $this->amount_paid);
+        return Money::sub(Money::sub($this->total, $this->amount_paid), $this->adjusted_amount ?? 0);
     }
 
     public function isOverdue(): bool
@@ -73,10 +73,13 @@ class Invoice extends Model
             ->pluck('amount')->all());
 
         $this->amount_paid = $paid;
+        $adjusted = Money::add(...FinancialAdjustment::where('invoice_id', $this->id)->where('status', 'approved')->pluck('amount')->all());
+        $this->adjusted_amount = $adjusted;
+        $settled = Money::add($paid, $adjusted);
 
         if ($this->status !== 'void') {
-            $this->status = Money::cmp($paid, $this->total) >= 0 ? 'paid'
-                : (Money::isPositive($paid) ? 'partial' : 'unpaid');
+            $this->status = Money::cmp($settled, $this->total) >= 0 ? 'paid'
+                : (Money::isPositive($settled) ? 'partial' : 'unpaid');
         }
 
         $this->save();
