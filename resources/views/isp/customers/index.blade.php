@@ -2,7 +2,8 @@
 @section('title', 'Pelanggan')
 @section('content')
 <div class="page-head"><div><h1>Pelanggan</h1><p>Data pelanggan internet dan layanannya.</p></div>
-  @can('customers.create')<a href="{{ route('app.customers.create') }}" class="btn btn-primary"><x-icon name="plus"/> Pelanggan baru</a>@endcan</div>
+  <div class="actions">@can('customers.import')<a href="{{ route('app.imports.index') }}" class="btn"><x-icon name="upload"/> Import Excel/CSV</a>@endcan
+  @can('customers.create')<a href="{{ route('app.customers.create') }}" class="btn btn-primary"><x-icon name="plus"/> Pelanggan baru</a>@endcan</div></div>
 <div class="card">
   <form class="toolbar" method="GET">
     <input class="input grow" name="q" value="{{ request('q') }}" placeholder="Cari nama, ID pelanggan, nomor, atau alamat">

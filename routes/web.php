@@ -108,6 +108,15 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
     Route::get('pelanggan', [Isp\CustomerController::class, 'index'])->middleware('can:customers.view')->name('customers.index');
     Route::get('pelanggan/tambah', [Isp\CustomerController::class, 'create'])->middleware('can:customers.create')->name('customers.create');
     Route::post('pelanggan', [Isp\CustomerController::class, 'store'])->middleware('can:customers.create')->name('customers.store');
+    Route::middleware('can:customers.import')->group(function () {
+        Route::get('import', [Isp\ImportController::class, 'index'])->name('imports.index');
+        Route::get('import/template', [Isp\ImportController::class, 'template'])->name('imports.template');
+        Route::post('import', [Isp\ImportController::class, 'store'])->middleware('throttle:20,1')->name('imports.store');
+        Route::get('import/{import}', [Isp\ImportController::class, 'show'])->name('imports.show');
+        Route::post('import/{import}/eksekusi', [Isp\ImportController::class, 'execute'])->name('imports.execute');
+        Route::post('import/{import}/batal', [Isp\ImportController::class, 'cancel'])->name('imports.cancel');
+        Route::get('import/{import}/kesalahan', [Isp\ImportController::class, 'errors'])->name('imports.errors');
+    });
     Route::get('pelanggan/{customer}', [Isp\CustomerController::class, 'show'])->middleware('can:customers.view')->name('customers.show');
     Route::get('pelanggan/{customer}/edit', [Isp\CustomerController::class, 'edit'])->middleware('can:customers.update')->name('customers.edit');
     Route::put('pelanggan/{customer}', [Isp\CustomerController::class, 'update'])->middleware('can:customers.update')->name('customers.update');

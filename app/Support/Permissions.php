@@ -19,6 +19,8 @@ class Permissions
         'saas_plans.manage' => ['saas', 'Kelola paket SaaS', 'platform'],
         'saas_subscriptions.manage' => ['saas', 'Kelola langganan & tagihan SaaS', 'platform'],
         'platform.audit_logs.view' => ['platform', 'Lihat audit platform', 'platform'],
+        'platform.backups.restore' => ['platform', 'Restore backup tenant (ke tenant baru)', 'platform'],
+        'platform.health.view' => ['platform', 'Lihat kesehatan platform', 'platform'],
 
         // Tenant (ISP)
         'dashboard.view' => ['dashboard', 'Lihat dashboard', 'tenant'],
@@ -26,6 +28,24 @@ class Permissions
         'customers.create' => ['customers', 'Tambah pelanggan', 'tenant'],
         'customers.update' => ['customers', 'Ubah pelanggan', 'tenant'],
         'customers.sensitive.view' => ['customers', 'Lihat NIK/KTP pelanggan', 'tenant'],
+        'customers.import' => ['customers', 'Import data pelanggan (Excel/CSV)', 'tenant'],
+        'customers.portal.manage' => ['customers', 'Kelola akses portal pelanggan', 'tenant'],
+        'tickets.view' => ['tickets', 'Lihat tiket bantuan', 'tenant'],
+        'tickets.manage' => ['tickets', 'Tangani tiket bantuan', 'tenant'],
+        'work_orders.view' => ['work_orders', 'Lihat work order', 'tenant'],
+        'work_orders.manage' => ['work_orders', 'Buat & tugaskan work order', 'tenant'],
+        'work_orders.update' => ['work_orders', 'Kerjakan work order (teknisi)', 'tenant'],
+        'inventory.view' => ['inventory', 'Lihat inventaris', 'tenant'],
+        'inventory.manage' => ['inventory', 'Kelola stok & pergerakan inventaris', 'tenant'],
+        'monitoring.view' => ['monitoring', 'Lihat monitoring jaringan', 'tenant'],
+        'monitoring.alerts.acknowledge' => ['monitoring', 'Acknowledge alarm', 'tenant'],
+        'monitoring.settings.manage' => ['monitoring', 'Atur target & threshold monitoring', 'tenant'],
+        'incidents.manage' => ['incidents', 'Kelola gangguan massal', 'tenant'],
+        'announcements.send' => ['incidents', 'Kirim pengumuman massal', 'tenant'],
+        'commissions.view' => ['commissions', 'Lihat komisi kolektor', 'tenant'],
+        'commissions.manage' => ['commissions', 'Atur & selesaikan komisi', 'tenant'],
+        'reconciliation.manage' => ['payments', 'Rekonsiliasi pembayaran', 'tenant'],
+        'backups.manage' => ['backups', 'Buat & unduh backup tenant', 'tenant'],
         'packages.manage' => ['packages', 'Kelola paket layanan', 'tenant'],
         'services.manage' => ['services', 'Kelola layanan pelanggan', 'tenant'],
         'invoices.view' => ['invoices', 'Lihat invoice', 'tenant'],
@@ -53,21 +73,26 @@ class Permissions
         'isp_admin' => ['Admin ISP', 'tenant', ['*']],
         'noc' => ['NOC / Network Engineer', 'tenant', [
             'dashboard.view', 'customers.view', 'monitoring.devices.view', 'monitoring.devices.manage',
-            'network.odp.view', 'network.odp.manage',
+            'network.odp.view', 'network.odp.manage', 'monitoring.view', 'monitoring.alerts.acknowledge',
+            'monitoring.settings.manage', 'incidents.manage', 'announcements.send', 'tickets.view', 'tickets.manage',
+            'work_orders.view', 'work_orders.manage',
         ]],
         'billing' => ['Staf Billing / Keuangan', 'tenant', [
             'dashboard.view', 'customers.view', 'customers.create', 'customers.update', 'services.manage',
             'invoices.view', 'invoices.create', 'invoices.void', 'payments.view', 'payments.create',
-            'payments.verify', 'payments.reverse', 'reports.view', 'network.odp.view',
+            'payments.verify', 'payments.reverse', 'reports.view', 'network.odp.view', 'customers.import',
+            'customers.portal.manage', 'tickets.view', 'tickets.manage', 'commissions.view', 'commissions.manage', 'reconciliation.manage',
         ]],
         'technician' => ['Teknisi', 'tenant', [
             'dashboard.view', 'customers.view', 'monitoring.devices.view', 'network.odp.view', 'network.odp.manage',
+            'work_orders.view', 'work_orders.update', 'inventory.view', 'tickets.view', 'monitoring.view',
         ]],
         'collector' => ['Petugas Kolektor / Agen', 'tenant', [
-            'dashboard.view', 'customers.view', 'invoices.view', 'payments.view', 'payments.create',
+            'dashboard.view', 'customers.view', 'invoices.view', 'payments.view', 'payments.create', 'commissions.view',
         ]],
         'auditor' => ['Auditor (baca saja)', 'tenant', [
             'dashboard.view', 'customers.view', 'invoices.view', 'payments.view', 'reports.view', 'audit_logs.view',
+            'commissions.view', 'inventory.view', 'work_orders.view', 'tickets.view', 'monitoring.view',
         ]],
     ];
 

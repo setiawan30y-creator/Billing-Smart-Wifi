@@ -15,6 +15,7 @@
     ['Utama', null, null, null],
     ['Dashboard', 'app.dashboard', 'home', 'dashboard.view'],
     ['Pelanggan', 'app.customers.index', 'users', 'customers.view'],
+    ['Import Data', 'app.imports.index', 'upload', 'customers.import'],
     ['Invoice', 'app.invoices.index', 'receipt', 'invoices.view'],
     ['Pembayaran', 'app.payments.index', 'wallet', 'payments.view'],
     ['Jaringan', null, null, null],
