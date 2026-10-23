@@ -23,6 +23,33 @@
   <div class="card stat"><div class="stat-label">Terkumpul bulan ini</div><div class="stat-value" style="color:var(--success)">{{ rupiah($collectedMonth) }}</div><div class="stat-sub">{{ $pendingPayments }} pembayaran menunggu verifikasi</div></div>
 </div>
 
+@can('customers.view')
+<div class="card" style="margin-bottom:1rem" id="pppoe-widget" data-url="{{ route('app.dashboard.pppoe') }}">
+  <div class="card-head"><h3>Status pelanggan PPPoE</h3>
+    <div class="actions"><button type="button" class="btn btn-sm" data-pppoe-refresh><x-icon name="refresh"/> Perbarui</button>
+    @can('monitoring.devices.view')<a href="{{ route('app.pppoe.index') }}" class="btn btn-sm">Detail</a>@endcan</div></div>
+  <div data-pppoe-body><div class="card-body small muted">Memuat status online/offline dari router…</div></div>
+</div>
+<script>
+(function () {
+  var box = document.getElementById('pppoe-widget');
+  if (!box) return;
+  var body = box.querySelector('[data-pppoe-body]');
+  function load() {
+    fetch(box.dataset.url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) { body.innerHTML = html; })
+      .catch(function () { body.innerHTML = '<div class="card-body small" style="color:var(--danger)">Status PPPoE gagal dimuat. Coba Perbarui.</div>'; });
+  }
+  box.querySelector('[data-pppoe-refresh]').addEventListener('click', function () {
+    body.innerHTML = '<div class="card-body small muted">Memuat…</div>'; load();
+  });
+  load();
+  setInterval(load, 60000);
+})();
+</script>
+@endcan
+
 <div class="grid grid-2" style="margin-bottom:1rem">
   <div class="card"><div class="card-head"><h3>Invoice terbaru</h3><a href="{{ route('app.invoices.index') }}" class="btn btn-sm">Semua</a></div>
     <div class="table-wrap"><table class="table"><tbody>

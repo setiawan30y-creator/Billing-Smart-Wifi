@@ -147,10 +147,14 @@ table.table { width: 100%; border-collapse: collapse; font-size: .84rem; line-he
 .table .badge { padding: .04rem .45rem; font-size: .68rem; }
 .table input:not([type=checkbox]):not([type=radio]), .table select { padding: .2rem .4rem; font-size: .8rem; min-height: 0; }
 .table td form { margin: 0; }
+.table td.empty { padding: 1.4rem 1rem; height: auto; background-image: none; text-align: center; }
 .table td.tabs { display: flex; gap: .25rem; padding: 0 1rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
 .tabs a { display: inline-flex; align-items: center; gap: .4rem; padding: .7rem .8rem; color: var(--text-2); font-weight: 600; font-size: .88rem; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tabs a:hover { color: var(--text); }
 .tabs a.active { color: var(--primary); border-bottom-color: var(--primary); }
+.pp-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.pp-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--muted-50); margin-top: .8rem; }
+.pp-bar span { display: block; height: 100%; }
 .empty { padding: 1.6rem 1rem; height: auto; background-image: none; text-align: center; }
 .empty { padding: 2.5rem 1rem; text-align: center; color: var(--text-3); }
 dl.kv { display: grid; grid-template-columns: 150px 1fr; gap: .45rem 1rem; margin: 0; }

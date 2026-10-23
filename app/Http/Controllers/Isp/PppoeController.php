@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Isp;
 
 use App\Http\Controllers\Controller;
-use App\Integrations\MikroTik\PppoeReader;
 use App\Models\CustomerService;
 use App\Models\NetworkDevice;
+use App\Services\PppoeStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 /**
@@ -18,9 +17,15 @@ use Throwable;
  */
 class PppoeController extends Controller
 {
-    public const CACHE_SECONDS = 30;
+    public const CACHE_SECONDS = PppoeStatusService::CACHE_SECONDS;
 
-    public function index(Request $request, PppoeReader $reader)
+    /** Widget dashboard: ringkasan pelanggan online/offline (dimuat async agar dashboard tidak menunggu router). */
+    public function dashboardWidget(PppoeStatusService $pppoe)
+    {
+        return response()->view('isp.pppoe._dashboard', ['s' => $pppoe->customerSummary()])->header('Cache-Control', 'no-store');
+    }
+
+    public function index(Request $request, PppoeStatusService $pppoe)
     {
         $tab = $request->query('tab') === 'active' ? 'active' : 'secrets';
         $routers = NetworkDevice::where('type', 'mikrotik')->where('is_active', true)->orderBy('name')->get();
@@ -32,12 +37,8 @@ class PppoeController extends Controller
             return view('isp.pppoe.index', $view);
         }
 
-        $key = 'pppoe:'.$device->tenant_id.':'.$device->id;
-        if ($request->boolean('refresh')) {
-            Cache::forget($key);
-        }
         try {
-            $data = Cache::remember($key, self::CACHE_SECONDS, fn () => $reader->read($device));
+            $data = $pppoe->fetch($device, $request->boolean('refresh'));
         } catch (Throwable $e) {
             $view['error'] = mb_substr($e->getMessage(), 0, 250);
 

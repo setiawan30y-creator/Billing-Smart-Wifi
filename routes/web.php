@@ -103,6 +103,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'superadmin'])->grou
 */
 Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(function () {
     Route::get('/', Isp\DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
+    Route::get('dashboard/pppoe', [Isp\PppoeController::class, 'dashboardWidget'])->middleware('can:customers.view')->name('dashboard.pppoe');
 
     // Paket layanan internet
     Route::middleware('can:packages.manage')->group(function () {

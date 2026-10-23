@@ -150,4 +150,48 @@ class PppoeTest extends TestCase
         $this->actingAs($this->tenantUser($this->tenant))->get(route('app.pppoe.index', ['device' => $foreign->id]))->assertOk()
             ->assertDontSee('10.9.9.9')->assertSee('Belum ada router MikroTik aktif');
     }
+
+    public function test_dashboard_widget_counts_online_offline_and_isolated(): void
+    {
+        $this->router();
+        $this->inTenant($this->tenant, function () {
+            $pkg = ServicePackage::create(['code' => 'H', 'name' => 'Home 20M', 'price' => 100000, 'is_active' => true]);
+            foreach ([['Pelanggan online', 'u-on', 'active'], ['Pelanggan mati', 'u-off', 'active'], ['Pelanggan isolir', 'u-iso', 'isolated'], ['Tanpa username', null, 'active']] as $i => [$n, $u, $st]) {
+                $c = new Customer(['name' => $n, 'phone' => '0813000000'.$i, 'address' => 'x', 'ownership' => 'own', 'status' => 'active']);
+                $c->customer_code = 'D'.$i;
+                $c->save();
+                $c->services()->create(['service_package_id' => $pkg->id, 'status' => $st, 'pppoe_username' => $u, 'started_at' => '2026-01-01']);
+            }
+        });
+        $this->app->instance(PppoeReader::class, new class extends PppoeReader
+        {
+            public function read(NetworkDevice $device): array
+            {
+                $a = fn ($n) => ['id' => null, 'name' => $n, 'service' => 'pppoe', 'address' => '10.1.1.'.strlen($n), 'caller_id' => null, 'uptime' => '1m', 'encoding' => null, 'comment' => null];
+
+                return ['secrets' => [], 'active' => [$a('u-on'), $a('u-iso')], 'fetched_at' => now()->toIso8601String()];
+            }
+        });
+
+        $admin = $this->tenantUser($this->tenant);
+        $this->actingAs($admin)->get(route('app.dashboard'))->assertOk()->assertSee('Status pelanggan PPPoE');
+        $s = $this->inTenant($this->tenant, fn () => app(\App\Services\PppoeStatusService::class)->customerSummary());
+        $this->assertSame([2, 1, 1, 1], [$s['online'], $s['offline'], $s['isolated_online'], $s['without_username']]);
+        $this->actingAs($admin)->get(route('app.dashboard.pppoe'))->assertOk()
+            ->assertSee('Pelanggan mati')->assertSee('Terisolir · online')->assertDontSee('Pelanggan online');
+    }
+
+    public function test_dashboard_widget_hides_offline_when_router_fails(): void
+    {
+        $this->router();
+        $this->app->instance(PppoeReader::class, new class extends PppoeReader
+        {
+            public function read(NetworkDevice $device): array
+            {
+                throw new RuntimeException('Waktu tunggu RouterOS habis.');
+            }
+        });
+        $this->actingAs($this->tenantUser($this->tenant))->get(route('app.dashboard.pppoe'))->assertOk()
+            ->assertSee('gagal dibaca')->assertSee('Waktu tunggu RouterOS habis');
+    }
 }
