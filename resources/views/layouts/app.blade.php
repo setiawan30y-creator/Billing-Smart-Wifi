@@ -127,5 +127,6 @@
 </script>
 @endif
 @stack('scripts')
+<script src="{{ asset('js/password-toggle.js') }}?v={{ config('almara.version') }}"></script>
 </body>
 </html>

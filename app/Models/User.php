@@ -79,6 +79,11 @@ class User extends Authenticatable
         return $this->roles->contains('slug', $slug);
     }
 
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
+
     public function flushPermissionCache(): void
     {
         $this->permissionCache = null;

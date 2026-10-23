@@ -9,7 +9,10 @@
     @csrf
     <div class="field"><label for="email">Email</label><input id="email" class="input" type="email" name="email" value="{{ old('email') }}" placeholder="nama@perusahaan.com" required autofocus autocomplete="username"></div>
     <div class="field"><label for="password">Password</label><input id="password" class="input" type="password" name="password" required autocomplete="current-password"></div>
-    <label class="check"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
+    <div class="auth-links">
+      <label class="check"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
+      <a href="{{ route('password.request') }}" class="small">Lupa password?</a>
+    </div>
     <button class="btn btn-primary btn-block" type="submit">Masuk</button>
   </form>
 @endsection

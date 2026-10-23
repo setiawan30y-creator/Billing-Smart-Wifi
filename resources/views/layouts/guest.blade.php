@@ -30,5 +30,6 @@
     <div class="auth-card">@yield('content')</div>
   </section>
 </div>
+<script src="{{ asset('js/password-toggle.js') }}?v={{ config('almara.version') }}"></script>
 </body>
 </html>

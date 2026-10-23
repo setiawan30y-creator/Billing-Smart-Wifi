@@ -8,6 +8,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Isp;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
@@ -27,6 +28,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1');
     Route::get('/aktivasi/{token}', [ActivationController::class, 'show'])->name('activation.show');
     Route::post('/aktivasi/{token}', [ActivationController::class, 'store'])->middleware('throttle:10,1')->name('activation.store');
+
+    Route::get('/lupa-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/lupa-password', [PasswordResetController::class, 'email'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.update');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
