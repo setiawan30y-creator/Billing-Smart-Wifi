@@ -26,6 +26,10 @@
   --sidebar-active: #ffffff;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(15, 27, 45, .05), 0 4px 16px rgba(15, 27, 45, .05);
+  --rule: #cfe0f1;
+  --rule-strong: #8fb6dd;
+  --margin-line: #ef9a9a;
+  --row-hover: #f2f7fd;
   --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
@@ -48,6 +52,10 @@
   --danger-50: #3d1a1d;
   --muted-50: #1b2638;
   --sidebar: #08101d;
+  --rule: #22374f;
+  --rule-strong: #35597f;
+  --margin-line: #7a3a40;
+  --row-hover: #16243a;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3);
   color-scheme: dark;
 }
@@ -122,14 +130,24 @@ small, .small { font-size: .82rem; }
 .stat-value { font-size: 1.45rem; font-weight: 700; margin-top: .25rem; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .stat-sub { font-size: .78rem; color: var(--text-3); margin-top: .15rem; }
 
-/* Tables */
+/* Tables — gaya buku tulis: baris rapat, garis biru tipis, garis margin merah di kiri. @2026-Alifiandra */
 .table-wrap { overflow-x: auto; }
-table.table { width: 100%; border-collapse: collapse; }
-.table th { text-align: left; font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); font-weight: 600; padding: .65rem 1rem; background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; }
-.table td { padding: .7rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-.table tr:last-child td { border-bottom: 0; }
-.table tbody tr:hover td { background: var(--surface-2); }
-.table .num { text-align: right; }
+table.table { width: 100%; border-collapse: collapse; font-size: .84rem; line-height: 1.28; font-variant-numeric: tabular-nums; }
+.table th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); font-weight: 700; padding: .42rem .6rem; background-color: var(--surface-2); border-bottom: 2px solid var(--rule-strong); white-space: nowrap; }
+.table td { padding: .22rem .6rem; height: 1.8rem; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.table th:first-child, .table td:first-child {
+  padding-left: 1.05rem;
+  background-image: linear-gradient(90deg, transparent 0 .42rem, var(--margin-line) .42rem calc(.42rem + 1px), transparent calc(.42rem + 1px) calc(.42rem + 3px), var(--margin-line) calc(.42rem + 3px) calc(.42rem + 4px), transparent calc(.42rem + 4px));
+}
+.table tbody tr:hover td { background-color: var(--row-hover); }
+.table .num { text-align: right; white-space: nowrap; }
+.table td .small, .table td small, .table td .muted { font-size: .75rem; line-height: 1.18; }
+.table td > div + div { margin-top: .05rem; }
+.table .btn { padding: .18rem .5rem; font-size: .75rem; border-radius: 6px; gap: .3rem; }
+.table .badge { padding: .04rem .45rem; font-size: .68rem; }
+.table input:not([type=checkbox]):not([type=radio]), .table select { padding: .2rem .4rem; font-size: .8rem; min-height: 0; }
+.table td form { margin: 0; }
+.table td.empty { padding: 1.6rem 1rem; height: auto; background-image: none; text-align: center; }
 .empty { padding: 2.5rem 1rem; text-align: center; color: var(--text-3); }
 dl.kv { display: grid; grid-template-columns: 150px 1fr; gap: .45rem 1rem; margin: 0; }
 dl.kv dt { color: var(--text-2); font-size: .85rem; }
@@ -213,7 +231,8 @@ textarea.input { min-height: 90px; resize: vertical; }
 /* Print */
 .doc { max-width: 820px; margin: 0 auto; background: #fff; color: #111; padding: 2.2rem; }
 .doc table { width: 100%; border-collapse: collapse; }
-.doc th, .doc td { padding: .5rem; border-bottom: 1px solid #ddd; text-align: left; }
+.doc th, .doc td { padding: .28rem .5rem; border-bottom: 1px solid #cfe0f1; text-align: left; font-size: .88rem; }
+.doc th { border-bottom: 2px solid #8fb6dd; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
 .doc .num { text-align: right; }
 .stamp { display: inline-block; border: 3px solid; padding: .2rem .8rem; border-radius: 6px; font-weight: 800; letter-spacing: .1em; transform: rotate(-6deg); }
 @media print { .no-print { display: none !important; } body { background: #fff; } .doc { padding: 0; } }
