@@ -42,7 +42,7 @@ class PaymentService
                 'status' => 'pending',
                 'proof_path' => $proofPath,
                 'paid_at' => $data['paid_at'] ?? now(),
-                'received_by' => auth()->id(),
+                'received_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(),
                 'idempotency_key' => $data['idempotency_key'] ?? null,
                 'planned_invoice_ids' => ! empty($data['invoice_ids']) ? array_values(array_map('intval', $data['invoice_ids'])) : null,
                 'notes' => $data['notes'] ?? null,
@@ -90,7 +90,7 @@ class PaymentService
 
             $payment->forceFill([
                 'status' => 'verified',
-                'verified_by' => auth()->id(),
+                'verified_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(),
                 'verified_at' => now(),
                 'unallocated_amount' => $remaining,
             ])->save();
@@ -136,7 +136,7 @@ class PaymentService
                 throw new InvalidArgumentException('Hanya pembayaran terverifikasi yang dapat di-reversal.');
             }
             $payment->forceFill([
-                'status' => 'reversed', 'reversed_by' => auth()->id(), 'reversed_at' => now(), 'reversal_reason' => $reason,
+                'status' => 'reversed', 'reversed_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(), 'reversed_at' => now(), 'reversal_reason' => $reason,
             ])->save();
 
             $invoices = Invoice::whereIn('id', $payment->allocations()->pluck('invoice_id'))->lockForUpdate()->get();

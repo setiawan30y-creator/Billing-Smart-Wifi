@@ -162,7 +162,7 @@ class TenantController extends Controller
     public function activationLink(Request $request, Tenant $tenant)
     {
         $admin = $tenant->users()->whereNull('password')->findOrFail($request->integer('user_id'));
-        [, $token] = UserInvitation::issue($admin, auth()->id());
+        [, $token] = UserInvitation::issue($admin, \Illuminate\Support\Facades\Auth::guard('web')->id());
         AuditLogger::log('tenant.activation_link_issued', $admin, null, ['user' => $admin->email], null, $tenant->id);
 
         return back()->with('activation_link', route('activation.show', $token));

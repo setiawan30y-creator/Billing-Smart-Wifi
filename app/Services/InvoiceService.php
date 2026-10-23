@@ -127,7 +127,7 @@ class InvoiceService
                 'amount_paid' => '0',
                 'status' => Money::isPositive($total) ? 'unpaid' : 'paid',
                 'notes' => $notes,
-                'created_by' => auth()->id(),
+                'created_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(),
             ]);
             $invoice->items()->createMany($rows);
             AuditLogger::log('invoice.created', $invoice, null, ['number' => $invoice->number, 'total' => $total]);

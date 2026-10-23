@@ -19,6 +19,8 @@ class NotificationTemplate extends Model
         'service_activated' => 'Aktivasi layanan',
         'service_isolated' => 'Penangguhan layanan',
         'service_restored' => 'Pemulihan layanan',
+        'ticket_updated' => 'Pembaruan tiket bantuan',
+        'mass_announcement' => 'Pengumuman gangguan massal',
     ];
 
     public const PLACEHOLDERS = [
@@ -33,6 +35,10 @@ class NotificationTemplate extends Model
         'jumlah_bayar' => 'Jumlah pembayaran',
         'paket' => 'Nama paket',
         'kontak_isp' => 'Kontak ISP',
+        'nomor_tiket' => 'Nomor tiket',
+        'status_tiket' => 'Status tiket',
+        'isi_pengumuman' => 'Isi pengumuman',
+        'link_portal' => 'Link portal pelanggan',
     ];
 
     public const DEFAULTS = [
@@ -45,6 +51,8 @@ class NotificationTemplate extends Model
         'service_activated' => "Yth. {nama_pelanggan},\nLayanan internet paket {paket} Anda telah aktif. Selamat menikmati.\n- {nama_isp}",
         'service_isolated' => "Yth. {nama_pelanggan},\nLayanan internet Anda sementara ditangguhkan. Silakan hubungi {kontak_isp}.\n- {nama_isp}",
         'service_restored' => "Yth. {nama_pelanggan},\nLayanan internet Anda telah dipulihkan. Terima kasih.\n- {nama_isp}",
+        'ticket_updated' => "Yth. {nama_pelanggan},\nTiket {nomor_tiket} Anda diperbarui. Status: {status_tiket}.\nLihat detail: {link_portal}\n- {nama_isp}",
+        'mass_announcement' => "Yth. {nama_pelanggan},\n{isi_pengumuman}\n- {nama_isp}",
     ];
 
     protected $fillable = ['event', 'channel', 'body', 'is_enabled'];

@@ -21,7 +21,7 @@ class AuditLogger
 
         return AuditLog::create([
             'tenant_id' => $tenantId ?? ($subject?->getAttribute('tenant_id')) ?? app(TenantContext::class)->id(),
-            'user_id' => Auth::id(),
+            'user_id' => Auth::guard('web')->id(),
             'action' => $action,
             'auditable_type' => $subject ? $subject->getMorphClass() : null,
             'auditable_id' => $subject?->getKey(),

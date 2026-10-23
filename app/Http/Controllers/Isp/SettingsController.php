@@ -23,6 +23,7 @@ class SettingsController extends Controller
             'invoice_prefix' => ['required', 'alpha_dash', 'max:10'],
             'reminder_offsets' => ['nullable', 'array'],
             'reminder_offsets.*' => ['integer', 'in:-7,-3,-1,0,1,3,7'],
+            'payment_instructions' => ['nullable', 'string', 'max:1500'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024', 'dimensions:max_width=2000,max_height=2000'],
         ]);
 
@@ -31,6 +32,7 @@ class SettingsController extends Controller
         $settings['quota_policy'] = $data['quota_policy'];
         $settings['invoice_prefix'] = strtoupper($data['invoice_prefix']);
         $settings['reminder_offsets'] = array_values(array_map('intval', $data['reminder_offsets'] ?? []));
+        $settings['payment_instructions'] = $data['payment_instructions'] ?? null;
 
         $tenant->brand_name = $data['brand_name'] ?? null;
         $tenant->theme = $data['theme'];

@@ -34,9 +34,12 @@ class TenantContext
             return $this->tenantId;
         }
 
-        // Fallback lazy: ambil dari user yang sedang login (guard web).
-        if (Auth::hasUser() || Auth::check()) {
-            return Auth::user()->tenant_id;
+        // Fallback lazy: ambil dari user yang sedang login (guard web), lalu akun portal pelanggan.
+        if (Auth::guard('web')->check()) {
+            return Auth::guard('web')->user()->tenant_id;
+        }
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user()->tenant_id;
         }
 
         return null;

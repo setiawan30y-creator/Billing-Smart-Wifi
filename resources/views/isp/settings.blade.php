@@ -21,6 +21,8 @@
       @foreach ([-7 => 'H-7', -3 => 'H-3', -1 => 'H-1', 0 => 'Hari H', 1 => 'H+1', 3 => 'H+3', 7 => 'H+7'] as $v => $l)
         <label class="check"><input type="checkbox" name="reminder_offsets[]" value="{{ $v }}" @checked(in_array($v, $offsets, true))> {{ $l }}</label>
       @endforeach</div><div class="hint">Pengingat berhenti otomatis setelah pembayaran terverifikasi.</div></div>
+    <x-field name="payment_instructions" label="Instruksi pembayaran di portal pelanggan" type="textarea" :value="$tenant->setting('payment_instructions')" full rows="4" placeholder="mis. Transfer ke rekening Bank ... a.n. ... lalu unggah bukti transfer." hint="Ditampilkan di halaman Bayar pada portal pelanggan."/>
+    <div class="field full"><label>Link portal pelanggan</label><input class="input mono" readonly value="{{ route('portal.login', $tenant->code) }}" onclick="this.select()"><div class="hint">Bagikan link ini ke pelanggan. Akses tiap pelanggan diaktifkan dari halaman detail pelanggan.</div></div>
   </div></div>
   <div class="card-body" style="border-top:1px solid var(--border)"><button class="btn btn-primary">Simpan pengaturan</button></div>
 </form>

@@ -72,7 +72,7 @@ class ImportController extends Controller
         if ($import->valid_rows === 0) {
             return back()->with('error', 'Tidak ada baris valid untuk diimport.');
         }
-        $import->update(['executed_by' => auth()->id(), 'executed_at' => now()]);
+        $import->update(['executed_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(), 'executed_at' => now()]);
         AuditLogger::log('import.executed', $import, null, ['valid_rows' => $import->valid_rows, 'error_rows' => $import->error_rows]);
         ProcessImportBatch::dispatch($this->tenant()->id, $import->id);
 

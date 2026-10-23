@@ -103,7 +103,7 @@ class SaasBillingService
                 'method' => $data['method'],
                 'reference' => $data['reference'] ?? null,
                 'status' => 'verified',
-                'recorded_by' => auth()->id(),
+                'recorded_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(),
                 'paid_at' => $data['paid_at'] ?? now(),
                 'notes' => $data['notes'] ?? null,
             ]);

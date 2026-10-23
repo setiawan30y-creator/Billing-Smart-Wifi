@@ -91,7 +91,7 @@ class CustomerImportService
                 'original_name' => mb_substr($file->getClientOriginalName(), 0, 190),
                 'file_path' => $file->store('tenants/'.$tenant->id.'/imports', config('almara.private_disk')),
                 'status' => 'validated',
-                'created_by' => auth()->id(),
+                'created_by' => \Illuminate\Support\Facades\Auth::guard('web')->id(),
             ]);
 
             $ctx = $this->context();

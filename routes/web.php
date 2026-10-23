@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Isp;
+use App\Http\Controllers\Portal;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -121,6 +122,20 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
     Route::get('pelanggan/{customer}/edit', [Isp\CustomerController::class, 'edit'])->middleware('can:customers.update')->name('customers.edit');
     Route::put('pelanggan/{customer}', [Isp\CustomerController::class, 'update'])->middleware('can:customers.update')->name('customers.update');
     Route::get('pelanggan/{customer}/berkas/{type}', [Isp\CustomerController::class, 'file'])->whereIn('type', ['ktp', 'rumah'])->middleware('can:customers.view')->name('customers.file');
+    Route::post('pelanggan/{customer}/portal', [Isp\CustomerController::class, 'portalLink'])->middleware('can:customers.portal.manage')->name('customers.portal');
+    Route::post('pelanggan/{customer}/portal/toggle', [Isp\CustomerController::class, 'portalToggle'])->middleware('can:customers.portal.manage')->name('customers.portal.toggle');
+
+    // Tiket bantuan
+    Route::get('tiket', [Isp\TicketController::class, 'index'])->middleware('can:tickets.view')->name('tickets.index');
+    Route::middleware('can:tickets.manage')->group(function () {
+        Route::get('tiket/buat', [Isp\TicketController::class, 'create'])->name('tickets.create');
+        Route::post('tiket', [Isp\TicketController::class, 'store'])->name('tickets.store');
+        Route::post('tiket/{ticket}/balas', [Isp\TicketController::class, 'reply'])->name('tickets.reply');
+        Route::put('tiket/{ticket}', [Isp\TicketController::class, 'update'])->name('tickets.update');
+    });
+    Route::get('tiket/{ticket}', [Isp\TicketController::class, 'show'])->middleware('can:tickets.view')->name('tickets.show');
+    Route::get('tiket/{ticket}/lampiran/{message}', [Isp\TicketController::class, 'attachment'])->middleware('can:tickets.view')->name('tickets.attachment');
+
     Route::post('pelanggan/{customer}/layanan', [Isp\CustomerServiceController::class, 'store'])->middleware('can:services.manage')->name('services.store');
     Route::put('layanan/{service}', [Isp\CustomerServiceController::class, 'update'])->middleware('can:services.manage')->name('services.update');
 
@@ -197,4 +212,37 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
     });
 
     Route::get('audit', [Isp\AuditLogController::class, 'index'])->middleware('can:audit_logs.view')->name('audit.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Portal pelanggan (PWA) — /portal/{kode ISP}
+|--------------------------------------------------------------------------
+*/
+Route::prefix('portal/{tenantCode}')->name('portal.')->where(['tenantCode' => '[A-Za-z0-9\-]+'])->middleware('portal.tenant')->group(function () {
+    Route::middleware('guest:customer')->group(function () {
+        Route::get('login', [Portal\AuthController::class, 'show'])->name('login');
+        Route::post('login', [Portal\AuthController::class, 'login'])->middleware('throttle:20,1');
+        Route::get('aktivasi/{token}', [Portal\AuthController::class, 'activation'])->name('activation');
+        Route::post('aktivasi/{token}', [Portal\AuthController::class, 'activate'])->middleware('throttle:10,1')->name('activate');
+    });
+
+    Route::middleware('auth:customer')->group(function () {
+        Route::post('logout', [Portal\AuthController::class, 'logout'])->name('logout');
+        Route::get('/', Portal\HomeController::class)->name('home');
+        Route::get('tagihan', [Portal\BillingController::class, 'invoices'])->name('invoices');
+        Route::get('tagihan/{invoice}', [Portal\BillingController::class, 'invoice'])->whereNumber('invoice')->name('invoices.show');
+        Route::get('tagihan/{invoice}/bayar', [Portal\BillingController::class, 'pay'])->whereNumber('invoice')->name('invoices.pay');
+        Route::post('tagihan/{invoice}/bayar', [Portal\BillingController::class, 'submitProof'])->whereNumber('invoice')->middleware('throttle:10,1')->name('invoices.proof');
+        Route::get('pembayaran', [Portal\BillingController::class, 'payments'])->name('payments');
+        Route::get('pembayaran/{payment}/kuitansi', [Portal\BillingController::class, 'receipt'])->whereNumber('payment')->name('payments.receipt');
+        Route::get('tiket', [Portal\TicketController::class, 'index'])->name('tickets.index');
+        Route::get('tiket/baru', [Portal\TicketController::class, 'create'])->name('tickets.create');
+        Route::post('tiket', [Portal\TicketController::class, 'store'])->middleware('throttle:10,1')->name('tickets.store');
+        Route::get('tiket/{ticket}', [Portal\TicketController::class, 'show'])->whereNumber('ticket')->name('tickets.show');
+        Route::post('tiket/{ticket}/balas', [Portal\TicketController::class, 'reply'])->whereNumber('ticket')->middleware('throttle:20,1')->name('tickets.reply');
+        Route::get('tiket/{ticket}/lampiran/{message}', [Portal\TicketController::class, 'attachment'])->whereNumber(['ticket', 'message'])->name('tickets.attachment');
+        Route::get('profil', [Portal\ProfileController::class, 'edit'])->name('profile');
+        Route::put('profil/password', [Portal\ProfileController::class, 'password'])->name('profile.password');
+    });
 });

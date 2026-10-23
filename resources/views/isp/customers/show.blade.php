@@ -83,6 +83,28 @@
   </div>
 
   <div class="stack">
+    <div class="card"><div class="card-head"><h3>Portal pelanggan</h3>
+      @if ($portalAccount)<x-badge :status="! $portalAccount->is_active ? 'void' : ($portalAccount->password ? 'active' : 'pending')" :label="! $portalAccount->is_active ? 'Nonaktif' : ($portalAccount->password ? 'Aktif' : 'Belum aktivasi')"/>@else<x-badge status="muted" label="Belum dibuat"/>@endif</div>
+      <div class="card-body">
+        @if ($portalAccount?->last_login_at)<div class="small muted">Login terakhir {{ $portalAccount->last_login_at->format('d/m/Y H:i') }}</div>@endif
+        <div class="small muted" style="margin-bottom:.6rem">Login dengan ID <span class="mono">{{ $customer->customer_code }}</span> di <span class="mono" style="word-break:break-all">{{ route('portal.login', $currentTenant?->code ?? auth()->user()->tenant->code) }}</span></div>
+        @can('customers.portal.manage')
+        <div class="actions">
+          <form method="POST" action="{{ route('app.customers.portal', $customer) }}">@csrf<button class="btn btn-sm btn-primary">{{ $portalAccount?->password ? 'Reset password (link baru)' : 'Buat link aktivasi' }}</button></form>
+          @if ($portalAccount)<form method="POST" action="{{ route('app.customers.portal.toggle', $customer) }}">@csrf<button class="btn btn-sm">{{ $portalAccount->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form>@endif
+        </div>
+        <p class="small faint" style="margin:.5rem 0 0">Kirim link aktivasi ke WhatsApp pelanggan. Link sekali pakai, berlaku 72 jam.</p>
+        @endcan
+      </div></div>
+
+    @can('tickets.view')
+    <div class="card"><div class="card-head"><h3>Tiket</h3>@can('tickets.manage')<a class="btn btn-sm" href="{{ route('app.tickets.create', ['customer' => $customer->id]) }}">+ Tiket</a>@endcan</div>
+      <div class="card-body">
+        @forelse ($tickets as $t)<div style="display:flex;justify-content:space-between;gap:.5rem;margin-bottom:.4rem"><a class="small" href="{{ route('app.tickets.show', $t) }}">{{ \Illuminate\Support\Str::limit($t->subject, 32) }}</a><x-badge :status="$t->statusBadge()" :label="\App\Models\Ticket::STATUSES[$t->status]"/></div>
+        @empty <p class="small muted" style="margin:0">Belum ada tiket.</p> @endforelse
+      </div></div>
+    @endcan
+
     <div class="card"><div class="card-body"><dl class="kv" style="grid-template-columns:110px 1fr">
       <dt>WhatsApp</dt><dd>{{ $customer->phone }}</dd>
       <dt>Email</dt><dd>{{ $customer->email ?: '-' }}</dd>

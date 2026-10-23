@@ -35,7 +35,7 @@ class UserController extends Controller
             $user->is_active = true;
             $user->save();
             $user->roles()->sync($data['roles']);
-            [, $token] = UserInvitation::issue($user, auth()->id());
+            [, $token] = UserInvitation::issue($user, \Illuminate\Support\Facades\Auth::guard('web')->id());
             AuditLogger::log('user.created', $user, null, ['email' => $user->email, 'roles' => $data['roles']]);
 
             return [$user, $token];
@@ -57,7 +57,7 @@ class UserController extends Controller
         $this->ensureSameTenant($user);
         $data = $this->validated($request, $user);
 
-        if ($user->id === auth()->id() && (! $request->boolean('is_active') || ! in_array(Role::where('slug', 'isp_admin')->whereNull('tenant_id')->value('id'), $data['roles']))) {
+        if ($user->id === \Illuminate\Support\Facades\Auth::guard('web')->id() && (! $request->boolean('is_active') || ! in_array(Role::where('slug', 'isp_admin')->whereNull('tenant_id')->value('id'), $data['roles']))) {
             return back()->with('error', 'Anda tidak dapat menonaktifkan atau mencabut role Admin ISP dari akun sendiri.');
         }
 
@@ -74,7 +74,7 @@ class UserController extends Controller
     public function activationLink(User $user)
     {
         $this->ensureSameTenant($user);
-        [, $token] = UserInvitation::issue($user, auth()->id());
+        [, $token] = UserInvitation::issue($user, \Illuminate\Support\Facades\Auth::guard('web')->id());
         AuditLogger::log('user.activation_link_issued', $user);
 
         return back()->with('activation_link', route('activation.show', $token));

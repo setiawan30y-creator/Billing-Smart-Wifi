@@ -195,7 +195,7 @@ class TenantProvisioningService
         if (! $admin) {
             return; // sudah aktif
         }
-        [, $token] = UserInvitation::issue($admin, auth()->id());
+        [, $token] = UserInvitation::issue($admin, \Illuminate\Support\Facades\Auth::guard('web')->id());
         $admin->notify(new AdminInvitation($tenant, $token));
     }
 }

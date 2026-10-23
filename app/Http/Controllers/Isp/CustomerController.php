@@ -85,6 +85,8 @@ class CustomerController extends Controller
             'payments' => $customer->payments()->latest()->limit(10)->get(),
             'packages' => ServicePackage::where('is_active', true)->orderBy('price')->get(),
             'outstanding' => $customer->outstanding(),
+            'portalAccount' => \App\Models\CustomerAccount::where('customer_id', $customer->id)->first(),
+            'tickets' => \App\Models\Ticket::where('customer_id', $customer->id)->latest()->limit(5)->get(),
         ]);
     }
 
@@ -130,6 +132,31 @@ class CustomerController extends Controller
             'Cache-Control' => 'no-store, private',
             'Content-Disposition' => 'inline',
         ]);
+    }
+
+    /** Buat / reset tautan aktivasi portal pelanggan (sekali pakai, 72 jam). */
+    public function portalLink(Customer $customer)
+    {
+        $account = \App\Models\CustomerAccount::firstOrCreate(
+            ['customer_id' => $customer->id],
+            ['tenant_id' => $customer->tenant_id, 'is_active' => true]
+        );
+        $account->forceFill(['is_active' => true])->save();
+        $token = $account->issueActivationToken();
+        AuditLogger::log('portal.activation_link_issued', $customer);
+
+        $link = route('portal.activation', [$this->tenant()->code, $token]);
+
+        return back()->with('activation_link', $link);
+    }
+
+    public function portalToggle(Customer $customer)
+    {
+        $account = \App\Models\CustomerAccount::where('customer_id', $customer->id)->firstOrFail();
+        $account->forceFill(['is_active' => ! $account->is_active])->save();
+        AuditLogger::log($account->is_active ? 'portal.enabled' : 'portal.disabled', $customer);
+
+        return back()->with('success', $account->is_active ? 'Akses portal diaktifkan.' : 'Akses portal dinonaktifkan.');
     }
 
     /** Titik ODP untuk referensi di peta pemilih lokasi. */

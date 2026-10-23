@@ -18,6 +18,7 @@
     ['Import Data', 'app.imports.index', 'upload', 'customers.import'],
     ['Invoice', 'app.invoices.index', 'receipt', 'invoices.view'],
     ['Pembayaran', 'app.payments.index', 'wallet', 'payments.view'],
+    ['Tiket Bantuan', 'app.tickets.index', 'ticket', 'tickets.view'],
     ['Jaringan', null, null, null],
     ['Paket Layanan', 'app.packages.index', 'package', 'packages.manage'],
     ['Titik ODP & Peta', 'app.odps.index', 'map', 'network.odp.view'],
