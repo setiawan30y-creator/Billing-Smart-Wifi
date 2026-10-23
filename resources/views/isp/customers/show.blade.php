@@ -32,7 +32,7 @@
             <div class="field"><label>Status</label><select name="status" class="input">@foreach (\App\Models\CustomerService::STATUSES as $k => $l)<option value="{{ $k }}" @selected($s->status === $k)>{{ $l }}</option>@endforeach</select></div>
             <div class="field"><label>Harga khusus (Rp)</label><input name="price_override" class="input" value="{{ $s->price_override !== null ? (int) $s->price_override : '' }}" placeholder="Kosong = harga paket"></div>
             <div class="field"><label>PPPoE username</label><input name="pppoe_username" class="input" value="{{ $s->pppoe_username }}"></div>
-<div class="field"><label class="req">Mode tagihan</label><select name="billing_mode" class="input">@foreach (\App\Models\CustomerService::BILLING_MODES as $k => $l)<option value="{{ $k }}" @selected(($s->billing_mode ?? 'prepaid') === $k)>{{ $l }}</option>@endforeach</select><div class="hint">Prabayar: tagih bulan berjalan. Pascabayar: tagih pemakaian bulan sebelumnya.</div></div>
+@include('isp.customers._billing_mode', ['current' => $s->billing_mode ?? 'prepaid'])
             <div class="field"><label>Tanggal tagih</label><input type="number" name="billing_day" min="1" max="28" class="input" value="{{ $s->billing_day }}"></div>
             <div class="field"><label>Jatuh tempo (hari)</label><input type="number" name="due_days" min="0" max="60" class="input" value="{{ $s->due_days }}"></div>
             @can('network.odp.manage')
@@ -55,7 +55,7 @@
         <form method="POST" action="{{ route('app.services.store', $customer) }}" class="form-grid" style="margin-top:1rem">@csrf
           <div class="field"><label class="req">Paket</label><select name="service_package_id" class="input" required>@foreach ($packages as $p)<option value="{{ $p->id }}">{{ $p->name }} · {{ rupiah($p->price) }}</option>@endforeach</select></div>
           <div class="field"><label class="req">Mulai</label><input type="date" name="started_at" class="input" value="{{ now()->toDateString() }}" required></div>
-<div class="field"><label class="req">Mode tagihan</label><select name="billing_mode" class="input">@foreach (\App\Models\CustomerService::BILLING_MODES as $k => $l)<option value="{{ $k }}" @selected(auth()->user()->tenant->setting('default_billing_mode', 'prepaid') === $k)>{{ $l }}</option>@endforeach</select><div class="hint">Prabayar: tagih bulan berjalan. Pascabayar: tagih pemakaian bulan sebelumnya.</div></div>
+@include('isp.customers._billing_mode', ['current' => null])
           <div class="field"><label class="req">Tanggal tagih</label><input type="number" name="billing_day" class="input" value="1" min="1" max="28" required></div>
           <div class="field"><label class="req">Jatuh tempo (hari setelah terbit)</label><input type="number" name="due_days" class="input" value="10" min="0" max="60" required></div>
           <div class="field"><label>Harga khusus (Rp)</label><input name="price_override" class="input" placeholder="Kosong = harga paket"></div>

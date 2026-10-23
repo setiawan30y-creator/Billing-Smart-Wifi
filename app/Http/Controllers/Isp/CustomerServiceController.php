@@ -33,6 +33,9 @@ class CustomerServiceController extends Controller
     public function update(Request $request, CustomerService $service)
     {
         $data = $this->validated($request, true);
+        if ($this->tenant()->billingModeUniform()) {
+            unset($data['billing_mode']); // dikunci oleh pengaturan ISP
+        }
         $original = $service->getOriginal();
         $portId = $data['odp_port_id'] ?? null;
         unset($data['odp_port_id']);
@@ -93,7 +96,7 @@ class CustomerServiceController extends Controller
             'price_override' => $data['price_override'] ?? null,
             'billing_day' => $data['billing_day'] ?? 1,
             'due_days' => $data['due_days'] ?? 10,
-            'billing_mode' => $data['billing_mode'] ?? $tenant->setting('default_billing_mode', 'prepaid'),
+            'billing_mode' => $tenant->billingModeUniform() ? $tenant->defaultBillingMode() : ($data['billing_mode'] ?? $tenant->defaultBillingMode()),
             'pppoe_username' => $data['pppoe_username'] ?? null,
             'started_at' => $data['started_at'],
         ]);

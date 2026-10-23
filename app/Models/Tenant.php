@@ -106,6 +106,17 @@ class Tenant extends Model
         return data_get($this->settings ?? [], $key, $default);
     }
 
+    /** true = semua layanan mengikuti satu mode tagihan ISP (default); false = boleh berbeda per layanan. */
+    public function billingModeUniform(): bool
+    {
+        return $this->setting('billing_mode_scope', 'all') === 'all';
+    }
+
+    public function defaultBillingMode(): string
+    {
+        return $this->setting('default_billing_mode', 'prepaid') === 'postpaid' ? 'postpaid' : 'prepaid';
+    }
+
     public function displayName(): string
     {
         return $this->brand_name ?: $this->name;

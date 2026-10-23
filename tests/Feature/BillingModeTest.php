@@ -85,7 +85,7 @@ class BillingModeTest extends TestCase
     {
         $admin = $this->tenantUser($this->tenant);
         $this->actingAs($admin)->put(route('app.settings.update'), [
-            'theme' => 'default', 'quota_policy' => 'warn', 'invoice_prefix' => 'INV', 'default_billing_mode' => 'postpaid',
+            'theme' => 'default', 'quota_policy' => 'warn', 'invoice_prefix' => 'INV', 'default_billing_mode' => 'postpaid', 'billing_mode_scope' => 'per_service',
         ])->assertSessionHasNoErrors();
         $this->assertSame('postpaid', $this->tenant->fresh()->setting('default_billing_mode'));
 
@@ -112,5 +112,39 @@ class BillingModeTest extends TestCase
             'service_package_id' => $pkg->id, 'status' => 'active', 'billing_day' => 1, 'due_days' => 10, 'billing_mode' => 'prepaid',
         ])->assertSessionHasNoErrors()->assertSessionHas('warnings');
         $this->assertSame('prepaid', $svc->fresh()->billing_mode);
+    }
+
+    public function test_uniform_mode_changes_all_services_and_locks_per_service_choice(): void
+    {
+        $a = $this->service('prepaid');
+        $b = $this->service('prepaid');
+        $admin = $this->tenantUser($this->tenant);
+
+        $this->assertTrue($this->tenant->billingModeUniform(), 'Default: semua pelanggan ikut mode ISP');
+        $this->assertSame('prepaid', $this->tenant->defaultBillingMode());
+
+        $this->actingAs($admin)->put(route('app.settings.update'), [
+            'theme' => 'default', 'quota_policy' => 'warn', 'invoice_prefix' => 'INV', 'default_billing_mode' => 'postpaid', 'billing_mode_scope' => 'all',
+        ])->assertSessionHasNoErrors()->assertSessionHas('warnings');
+        $this->assertSame(['postpaid', 'postpaid'], [$a->fresh()->billing_mode, $b->fresh()->billing_mode]);
+
+        // Pilihan per layanan diabaikan saat mode seragam
+        $pkg = $a->service_package_id;
+        $this->actingAs($admin)->put(route('app.services.update', $a), [
+            'service_package_id' => $pkg, 'status' => 'active', 'billing_day' => 5, 'due_days' => 10, 'billing_mode' => 'prepaid',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('postpaid', $a->fresh()->billing_mode);
+        $this->actingAs($admin)->post(route('app.services.store', $a->customer_id), [
+            'service_package_id' => $pkg, 'started_at' => '2026-10-01', 'billing_day' => 1, 'due_days' => 10, 'billing_mode' => 'prepaid',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame(0, $this->inTenant($this->tenant, fn () => CustomerService::where('billing_mode', 'prepaid')->count()));
+
+        $this->actingAs($admin)->get(route('app.customers.show', $a->customer_id))->assertOk()->assertSee('mengikuti pengaturan ISP');
+
+        // Kembali ke prabayar → semua ikut + peringatan peralihan
+        $this->actingAs($admin)->put(route('app.settings.update'), [
+            'theme' => 'default', 'quota_policy' => 'warn', 'invoice_prefix' => 'INV', 'default_billing_mode' => 'prepaid', 'billing_mode_scope' => 'all',
+        ])->assertSessionHas('warnings', fn ($w) => str_contains(implode(' ', $w), 'pascabayar ke prabayar'));
+        $this->assertSame(0, $this->inTenant($this->tenant, fn () => CustomerService::where('billing_mode', 'postpaid')->count()));
     }
 }

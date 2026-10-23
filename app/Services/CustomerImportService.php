@@ -181,7 +181,7 @@ class CustomerImportService
             $svc = $c->services()->create([
                 'service_package_id' => $n['service_package_id'], 'status' => 'active',
                 'price_override' => $n['harga_khusus'], 'billing_day' => $n['tanggal_tagih'], 'due_days' => $n['jatuh_tempo_hari'],
-                'billing_mode' => $n['mode_tagihan'] ?? $tenant->setting('default_billing_mode', 'prepaid'),
+                'billing_mode' => $tenant->billingModeUniform() ? $tenant->defaultBillingMode() : ($n['mode_tagihan'] ?? $tenant->defaultBillingMode()),
                 'pppoe_username' => $n['pppoe_username'], 'started_at' => $n['tanggal_mulai'],
             ]);
             if ($n['odp_port_id']) {
