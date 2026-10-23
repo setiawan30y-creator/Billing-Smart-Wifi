@@ -5,6 +5,7 @@
   <div><h1>{{ $customer->name }} <x-badge :status="$customer->status" :label="\App\Models\Customer::STATUSES[$customer->status]"/></h1><p class="mono">{{ $customer->customer_code }}</p></div>
   <div class="actions">
     @can('customers.update')<a href="{{ route('app.customers.edit', $customer) }}" class="btn">Ubah</a>@endcan
+    @can('work_orders.manage')<a href="{{ route('app.work-orders.create', ['customer' => $customer->id]) }}" class="btn"><x-icon name="tool"/> Work order</a>@endcan
     @can('invoices.create')<a href="{{ route('app.invoices.create', ['customer' => $customer->id]) }}" class="btn">Invoice manual</a>@endcan
     @can('payments.create')<a href="{{ route('app.payments.create', ['customer' => $customer->id]) }}" class="btn btn-primary">Catat pembayaran</a>@endcan
   </div>

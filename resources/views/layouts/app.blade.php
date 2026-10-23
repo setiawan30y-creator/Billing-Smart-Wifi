@@ -19,6 +19,10 @@
     ['Invoice', 'app.invoices.index', 'receipt', 'invoices.view'],
     ['Pembayaran', 'app.payments.index', 'wallet', 'payments.view'],
     ['Tiket Bantuan', 'app.tickets.index', 'ticket', 'tickets.view'],
+    ['Lapangan', null, null, null],
+    ['Work Order', 'app.work-orders.index', 'tool', 'work_orders.view'],
+    ['Jadwal Teknisi', 'app.schedule.index', 'calendar', 'work_orders.view'],
+    ['Inventaris', 'app.inventory.index', 'box', 'inventory.view'],
     ['Jaringan', null, null, null],
     ['Paket Layanan', 'app.packages.index', 'package', 'packages.manage'],
     ['Titik ODP & Peta', 'app.odps.index', 'map', 'network.odp.view'],
@@ -32,7 +36,8 @@
   ];
   $bottom = $isAdmin
     ? [['Dashboard','admin.dashboard','home'],['ISP','admin.tenants.index','building'],['Paket','admin.plans.index','layers'],['Tagihan','admin.saas-invoices.index','receipt']]
-    : [['Beranda','app.dashboard','home'],['Pelanggan','app.customers.index','users'],['Invoice','app.invoices.index','receipt'],['Bayar','app.payments.index','wallet']];
+    : collect([['Beranda','app.dashboard','home','dashboard.view'],['Pelanggan','app.customers.index','users','customers.view'],['Invoice','app.invoices.index','receipt','invoices.view'],['Bayar','app.payments.index','wallet','payments.view'],['Tugas','app.work-orders.index','tool','work_orders.view'],['Tiket','app.tickets.index','ticket','tickets.view'],['ODP','app.odps.index','map','network.odp.view']])
+        ->filter(fn ($b) => $user->can($b[3]))->take(5)->map(fn ($b) => array_slice($b, 0, 3))->values()->all();
   $isActive = fn ($r) => substr_count($r, '.') > 1 ? request()->routeIs(\Illuminate\Support\Str::beforeLast($r, '.').'.*') : request()->routeIs($r);
 @endphp
 <!doctype html>

@@ -169,6 +169,44 @@ Route::prefix('app')->name('app.')->middleware(['auth', 'tenant'])->group(functi
         Route::delete('perangkat/{device}', [Isp\NetworkDeviceController::class, 'destroy'])->name('devices.destroy');
     });
 
+    // Work order teknisi & kalender
+    Route::get('work-order', [Isp\WorkOrderController::class, 'index'])->middleware('can:work_orders.view')->name('work-orders.index');
+    Route::get('jadwal', [Isp\ScheduleController::class, 'index'])->middleware('can:work_orders.view')->name('schedule.index');
+    Route::post('jadwal/ketersediaan', [Isp\ScheduleController::class, 'availability'])->middleware('can:work_orders.manage')->name('schedule.availability');
+    Route::middleware('can:work_orders.manage')->group(function () {
+        Route::get('work-order/buat', [Isp\WorkOrderController::class, 'create'])->name('work-orders.create');
+        Route::post('work-order', [Isp\WorkOrderController::class, 'store'])->name('work-orders.store');
+        Route::get('work-order/{workOrder}/edit', [Isp\WorkOrderController::class, 'edit'])->name('work-orders.edit');
+        Route::put('work-order/{workOrder}', [Isp\WorkOrderController::class, 'update'])->name('work-orders.update');
+    });
+    Route::middleware('can:work_orders.view')->group(function () {
+        Route::get('work-order/{workOrder}', [Isp\WorkOrderController::class, 'show'])->name('work-orders.show');
+        Route::post('work-order/{workOrder}/status', [Isp\WorkOrderController::class, 'status'])->name('work-orders.status');
+        Route::post('work-order/{workOrder}/checklist', [Isp\WorkOrderController::class, 'addChecklist'])->name('work-orders.checklist.add');
+        Route::post('work-order/{workOrder}/checklist/{item}', [Isp\WorkOrderController::class, 'checklist'])->name('work-orders.checklist');
+        Route::post('work-order/{workOrder}/foto', [Isp\WorkOrderController::class, 'media'])->name('work-orders.media');
+        Route::get('work-order/{workOrder}/foto/{media}', [Isp\WorkOrderController::class, 'mediaFile'])->name('work-orders.media.file');
+        Route::post('work-order/{workOrder}/material', [Isp\WorkOrderController::class, 'material'])->name('work-orders.material');
+        Route::post('work-order/{workOrder}/material/{material}/kembali', [Isp\WorkOrderController::class, 'returnMaterial'])->name('work-orders.material.return');
+    });
+
+    // Inventaris
+    Route::middleware('can:inventory.view')->group(function () {
+        Route::get('inventaris', [Isp\InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('inventaris/mutasi', [Isp\InventoryController::class, 'movements'])->name('inventory.movements');
+        Route::get('inventaris/lokasi', [Isp\InventoryController::class, 'locations'])->name('inventory.locations');
+    });
+    Route::middleware('can:inventory.manage')->group(function () {
+        Route::get('inventaris/tambah', [Isp\InventoryController::class, 'create'])->name('inventory.create');
+        Route::post('inventaris', [Isp\InventoryController::class, 'store'])->name('inventory.store');
+        Route::get('inventaris/{item}/edit', [Isp\InventoryController::class, 'edit'])->name('inventory.edit');
+        Route::put('inventaris/{item}', [Isp\InventoryController::class, 'update'])->name('inventory.update');
+        Route::post('inventaris/{item}/mutasi', [Isp\InventoryController::class, 'movement'])->name('inventory.movement');
+        Route::post('inventaris/serial/{serial}/rusak', [Isp\InventoryController::class, 'serialFaulty'])->name('inventory.serial.faulty');
+        Route::post('inventaris/lokasi', [Isp\InventoryController::class, 'storeLocation'])->name('inventory.locations.store');
+    });
+    Route::get('inventaris/{item}', [Isp\InventoryController::class, 'show'])->middleware('can:inventory.view')->name('inventory.show');
+
     // Topologi FTTH: ODC & titik ODP
     Route::get('odp', [Isp\OdpController::class, 'index'])->middleware('can:network.odp.view')->name('odps.index');
     Route::get('odc', [Isp\OdcController::class, 'index'])->middleware('can:network.odp.view')->name('odcs.index');
